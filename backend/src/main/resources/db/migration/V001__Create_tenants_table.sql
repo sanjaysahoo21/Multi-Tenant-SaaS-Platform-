@@ -1,6 +1,6 @@
 -- V001 - Create tenants table
 CREATE TABLE tenants (
-    id UUID PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     subdomain VARCHAR(255) NOT NULL UNIQUE,
     status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',

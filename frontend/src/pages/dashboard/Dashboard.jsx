@@ -12,8 +12,10 @@ function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadStats();
-  }, []);
+    if (user) {
+      loadStats();
+    }
+  }, [user]);
 
   const loadStats = async () => {
     try {
@@ -103,8 +105,8 @@ function Dashboard() {
             </div>
             <div className="info-row">
               <span className="info-label">Status:</span>
-              <span className={`status-badge ${user?.tenant?.status.toLowerCase()}`}>
-                {user?.tenant?.status}
+              <span className={`status-badge ${(user?.tenant?.status || '').toLowerCase()}`}>
+                {user?.tenant?.status || 'UNKNOWN'}
               </span>
             </div>
             <div className="info-row">

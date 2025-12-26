@@ -1,13 +1,13 @@
 -- V004 - Create tasks table
 CREATE TABLE tasks (
-    id UUID PRIMARY KEY,
-    project_id UUID NOT NULL,
-    tenant_id UUID NOT NULL,
+    id VARCHAR(36) PRIMARY KEY,
+    project_id VARCHAR(36) NOT NULL,
+    tenant_id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status VARCHAR(50) NOT NULL DEFAULT 'TODO',
     priority VARCHAR(50) NOT NULL DEFAULT 'MEDIUM',
-    assigned_to UUID,
+    assigned_to VARCHAR(36),
     due_date DATE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

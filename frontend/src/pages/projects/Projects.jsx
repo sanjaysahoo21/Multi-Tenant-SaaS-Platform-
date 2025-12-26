@@ -7,6 +7,7 @@ import './Projects.css';
 function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,11 +24,15 @@ function Projects() {
 
   const loadProjects = async () => {
     try {
+      setError('');
+      setLoading(true);
       const response = await api.get('/projects');
-      setProjects(response.data.data);
+      console.log('Projects loaded:', response.data.data);
+      setProjects(Array.isArray(response.data.data) ? response.data.data : []);
     } catch (error) {
       console.error('Failed to load projects:', error);
       setError('Failed to load projects');
+      setProjects([]);
     } finally {
       setLoading(false);
     }
@@ -66,6 +71,7 @@ function Projects() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
     try {
       if (editingProject) {
@@ -73,10 +79,15 @@ function Projects() {
       } else {
         await api.post('/projects', formData);
       }
-      await loadProjects();
+      console.log('Project saved successfully');
       handleCloseModal();
+      // Reload projects after closing modal to ensure fresh data
+      await loadProjects();
     } catch (err) {
-      setError(err.response?.data?.message || 'Operation failed');
+      console.error('Submit error:', err);
+      setError(err.response?.data?.message || err.message || 'Operation failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -130,8 +141,8 @@ function Projects() {
               <div key={project.id} className="project-card">
                 <div className="project-header">
                   <h3>{project.name}</h3>
-                  <span className={`status-badge ${project.status.toLowerCase()}`}>
-                    {project.status}
+                  <span className={`status-badge ${(project.status || '').toLowerCase()}`}>
+                    {project.status || 'UNKNOWN'}
                   </span>
                 </div>
                 <p className="project-description">
@@ -211,11 +222,11 @@ function Projects() {
                 </div>
 
                 <div className="modal-actions">
-                  <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                  <button type="button" className="btn btn-secondary" onClick={handleCloseModal} disabled={submitting}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingProject ? 'Update' : 'Create'}
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? 'Processing...' : (editingProject ? 'Update' : 'Create')}
                   </button>
                 </div>
               </form>

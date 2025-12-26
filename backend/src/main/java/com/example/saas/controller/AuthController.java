@@ -106,8 +106,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         if (request.email == null || request.email.isBlank() ||
-            request.password == null || request.password.isBlank() ||
-            request.tenantSubdomain == null) {
+            request.password == null || request.password.isBlank()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Invalid input"));
         }
 
@@ -117,7 +116,7 @@ public class AuthController {
             if (request.tenantSubdomain != null && !request.tenantSubdomain.isBlank()) {
                 tenantOpt = tenantRepository.findBySubdomain(request.tenantSubdomain);
             } else {
-                // For super admin, tenantSubdomain will be empty
+                // Allow login without subdomain; still enforce tenant status when present
                 Optional<User> userOpt = userRepository.findByEmail(request.email);
                 if (userOpt.isEmpty()) {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid credentials"));
@@ -128,6 +127,9 @@ public class AuthController {
                 }
                 if (!user.getIsActive()) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Account is inactive"));
+                }
+                if (user.getTenant() != null && user.getTenant().getStatus() != Tenant.TenantStatus.ACTIVE) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Tenant is not active"));
                 }
 
                 String token = jwtUtil.generateToken(user.getId(), user.getTenant() != null ? user.getTenant().getId() : null, user.getRole().toString());
@@ -217,6 +219,15 @@ public class AuthController {
         userData.put("role", user.getRole());
         if (user.getTenant() != null) {
             userData.put("tenantId", user.getTenant().getId());
+            Map<String, Object> tenantData = new HashMap<>();
+            tenantData.put("id", user.getTenant().getId());
+            tenantData.put("name", user.getTenant().getName());
+            tenantData.put("subdomain", user.getTenant().getSubdomain());
+            tenantData.put("status", user.getTenant().getStatus());
+            tenantData.put("subscriptionPlan", user.getTenant().getSubscriptionPlan());
+            tenantData.put("maxUsers", user.getTenant().getMaxUsers());
+            tenantData.put("maxProjects", user.getTenant().getMaxProjects());
+            userData.put("tenant", tenantData);
         }
         response.put("user", userData);
         response.put("token", token);

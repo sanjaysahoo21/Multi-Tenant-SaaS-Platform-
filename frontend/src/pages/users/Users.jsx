@@ -8,6 +8,7 @@ function Users() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -27,11 +28,20 @@ function Users() {
 
   const loadUsers = async () => {
     try {
+      if (!currentUser?.tenant?.id) {
+        setError('Tenant information not available');
+        setLoading(false);
+        return;
+      }
+      setError('');
+      setLoading(true);
       const response = await api.get(`/tenants/${currentUser.tenant.id}/users`);
-      setUsers(response.data.data);
+      console.log('Users loaded:', response.data.data);
+      setUsers(Array.isArray(response.data.data) ? response.data.data : []);
     } catch (error) {
       console.error('Failed to load users:', error);
       setError('Failed to load users');
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -78,6 +88,7 @@ function Users() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
     try {
       if (editingUser) {
@@ -89,10 +100,15 @@ function Users() {
       } else {
         await api.post(`/tenants/${currentUser.tenant.id}/users`, formData);
       }
-      await loadUsers();
+      console.log('User saved successfully');
       handleCloseModal();
+      // Reload users after closing modal to ensure fresh data
+      await loadUsers();
     } catch (err) {
-      setError(err.response?.data?.message || 'Operation failed');
+      console.error('Submit error:', err);
+      setError(err.response?.data?.message || err.message || 'Operation failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -138,6 +154,17 @@ function Users() {
     );
   }
 
+  if (currentUser?.role !== 'TENANT_ADMIN') {
+    return (
+      <div className="page-container">
+        <Navbar />
+        <div className="content">
+          <div className="error-message">You do not have permission to view this page. Only Tenant Admins can manage users.</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page-container">
       <Navbar />
@@ -168,7 +195,7 @@ function Users() {
                   <td>{user.fullName}</td>
                   <td>{user.email}</td>
                   <td>
-                    <span className={`role-badge ${user.role.toLowerCase()}`}>
+                    <span className={`role-badge ${(user.role || '').toLowerCase()}`}>
                       {user.role === 'TENANT_ADMIN' ? 'Admin' : 'User'}
                     </span>
                   </td>
@@ -276,11 +303,11 @@ function Users() {
                 </div>
 
                 <div className="modal-actions">
-                  <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                  <button type="button" className="btn btn-secondary" onClick={handleCloseModal} disabled={submitting}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingUser ? 'Update' : 'Add User'}
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? 'Processing...' : (editingUser ? 'Update' : 'Add User')}
                   </button>
                 </div>
               </form>

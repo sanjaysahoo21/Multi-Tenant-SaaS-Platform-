@@ -5,18 +5,18 @@ VALUES ('550e8400-e29b-41d4-a716-446655440001', 'Demo Company', 'demo', 'ACTIVE'
 
 -- Create super admin user
 INSERT INTO users (id, tenant_id, email, password_hash, full_name, role, is_active)
-VALUES ('550e8400-e29b-41d4-a716-446655440010', NULL, 'superadmin@system.com', '$2a$10$8GNmYmDjNF/j9TfC8gGhV.cKSz3p4k2r7x1t3z2k0j5m8p3l9n6o4', 'Super Admin', 'SUPER_ADMIN', true);
+VALUES ('550e8400-e29b-41d4-a716-446655440010', NULL, 'superadmin@system.com', '$2b$12$UbCtt5o9ExqjKnduByeU1O7ag8WuBPYrlmyJXThnFmVdnbpIT2XqG', 'Super Admin', 'SUPER_ADMIN', true);
 
 -- Create demo tenant admin
 INSERT INTO users (id, tenant_id, email, password_hash, full_name, role, is_active)
-VALUES ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440001', 'admin@demo.com', '$2a$10$8GNmYmDjNF/j9TfC8gGhV.cKSz3p4k2r7x1t3z2k0j5m8p3l9n6o4', 'Demo Admin', 'TENANT_ADMIN', true);
+VALUES ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440001', 'admin@demo.com', '$2b$12$Ss5jhgeKlvr0M38f0tDPwe/eZ7WejpT7w0W/DgjEMkvyMlMxzAvze', 'Demo Admin', 'TENANT_ADMIN', true);
 
 -- Create demo tenant users
 INSERT INTO users (id, tenant_id, email, password_hash, full_name, role, is_active)
-VALUES ('550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440001', 'user1@demo.com', '$2a$10$8GNmYmDjNF/j9TfC8gGhV.cKSz3p4k2r7x1t3z2k0j5m8p3l9n6o4', 'Demo User 1', 'USER', true);
+VALUES ('550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440001', 'user1@demo.com', '$2b$12$CMamegIKakLsOZJmPrh12umofNwuEJjSXg.EtJywxjjLsOH6guQmq', 'Demo User 1', 'USER', true);
 
 INSERT INTO users (id, tenant_id, email, password_hash, full_name, role, is_active)
-VALUES ('550e8400-e29b-41d4-a716-446655440013', '550e8400-e29b-41d4-a716-446655440001', 'user2@demo.com', '$2a$10$8GNmYmDjNF/j9TfC8gGhV.cKSz3p4k2r7x1t3z2k0j5m8p3l9n6o4', 'Demo User 2', 'USER', true);
+VALUES ('550e8400-e29b-41d4-a716-446655440013', '550e8400-e29b-41d4-a716-446655440001', 'user2@demo.com', '$2b$12$CMamegIKakLsOZJmPrh12umofNwuEJjSXg.EtJywxjjLsOH6guQmq', 'Demo User 2', 'USER', true);
 
 -- Create sample projects
 INSERT INTO projects (id, tenant_id, name, description, status, created_by)

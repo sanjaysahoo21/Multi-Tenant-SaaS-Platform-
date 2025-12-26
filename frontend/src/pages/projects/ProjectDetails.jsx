@@ -152,8 +152,8 @@ function ProjectDetails() {
         <div className="project-info">
           <div className="project-info-header">
             <h1>{project?.name}</h1>
-            <span className={`status-badge ${project?.status.toLowerCase()}`}>
-              {project?.status}
+            <span className={`status-badge ${(project?.status || '').toLowerCase()}`}>
+              {project?.status || 'UNKNOWN'}
             </span>
           </div>
           <p>{project?.description || 'No description'}</p>
@@ -336,8 +336,8 @@ function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
     <div className="task-card">
       <div className="task-header">
         <h4>{task.title}</h4>
-        <span className={`priority-badge ${task.priority.toLowerCase()}`}>
-          {task.priority}
+        <span className={`priority-badge ${(task.priority || '').toLowerCase()}`}>
+          {task.priority || 'UNKNOWN'}
         </span>
       </div>
       

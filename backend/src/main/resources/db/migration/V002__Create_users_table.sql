@@ -1,7 +1,7 @@
 -- V002 - Create users table
 CREATE TABLE users (
-    id UUID PRIMARY KEY,
-    tenant_id UUID,
+    id VARCHAR(36) PRIMARY KEY,
+    tenant_id VARCHAR(36),
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,

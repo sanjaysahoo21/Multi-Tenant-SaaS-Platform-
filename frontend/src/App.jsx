@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Dashboard from './pages/dashboard/Dashboard';
@@ -30,8 +31,9 @@ const PublicRoute = ({ children }) => {
 
 function AppRoutes() {
   return (
-    <Router>
-      <Routes>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
         <Route path="/login" element={
           <PublicRoute>
             <Login />
@@ -64,7 +66,8 @@ function AppRoutes() {
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
-    </Router>
+        </Router>
+    </ErrorBoundary>
   );
 }
 
