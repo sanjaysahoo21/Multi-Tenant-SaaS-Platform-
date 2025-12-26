@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: saas-postgres
+    environment:
+      POSTGRES_DB: saasdb
+      POSTGRES_USER: saasuser
+      POSTGRES_PASSWORD: saaspass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saasuser -d saasdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: saas-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/saasdb
+      SPRING_DATASOURCE_USERNAME: saasuser
+      SPRING_DATASOURCE_PASSWORD: saaspass123
+      JWT_SECRET: your-very-secure-secret-key-minimum-32-characters-long-for-HS256
+      JWT_EXPIRATION: 86400
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - saas-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: saas-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - saas-network
+
+volumes:
+  postgres_data:
+
+networks:
+  saas-network:
+    driver: bridge
