@@ -1,0 +1,74 @@
+.users-table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table thead {
+  background: #f8f9fa;
+}
+
+.users-table th {
+  text-align: left;
+  padding: 15px 20px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.users-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #666;
+}
+
+.users-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.role-badge.tenant_admin {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.role-badge.user {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.status-badge.inactive {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.table-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
