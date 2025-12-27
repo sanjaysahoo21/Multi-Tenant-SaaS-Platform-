@@ -117,7 +117,7 @@ public class TenantController {
                                     @RequestBody AddUserRequest request,
                                     @RequestAttribute("tenantId") String userTenantId,
                                     @RequestAttribute("role") String role) {
-        if (!role.equals("TENANT_ADMIN") || !tenantId.equals(userTenantId)) {
+        if (!(role.equals("TENANT_ADMIN") && tenantId.equals(userTenantId)) && !role.equals("SUPER_ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -155,10 +155,11 @@ public class TenantController {
     @GetMapping("/{tenantId}/users")
     public ResponseEntity<?> listUsers(@PathVariable String tenantId,
                                       @RequestAttribute("tenantId") String userTenantId,
+                                      @RequestAttribute("role") String role,
                                       @RequestParam(required = false) String search,
                                       @RequestParam(defaultValue = "1") int page,
                                       @RequestParam(defaultValue = "50") int limit) {
-        if (!tenantId.equals(userTenantId)) {
+        if (!role.equals("SUPER_ADMIN") && !tenantId.equals(userTenantId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -176,16 +177,7 @@ public class TenantController {
                 .map(this::buildUserResponse)
                 .collect(Collectors.toList());
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("users", userList);
-        response.put("total", users.getTotalElements());
-        Map<String, Object> pagination = new HashMap<>();
-        pagination.put("currentPage", page);
-        pagination.put("totalPages", users.getTotalPages());
-        pagination.put("limit", limit);
-        response.put("pagination", pagination);
-
-        return ResponseEntity.ok(ApiResponse.ok(response));
+        return ResponseEntity.ok(ApiResponse.ok(userList));
     }
 
     private Map<String, Object> buildTenantResponse(Tenant tenant) {
