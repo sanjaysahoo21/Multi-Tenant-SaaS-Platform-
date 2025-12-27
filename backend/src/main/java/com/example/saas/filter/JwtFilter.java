@@ -38,8 +38,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 String tenantId = jwtUtil.getTenantIdFromToken(token);
                 String role = jwtUtil.getRoleFromToken(token);
 
+                // Ensure request attributes are always present so controllers using
+                // @RequestAttribute do not fail when tenantId is null (e.g., super admin)
                 request.setAttribute("userId", userId);
-                request.setAttribute("tenantId", tenantId);
+                request.setAttribute("tenantId", tenantId != null ? tenantId : "");
                 request.setAttribute("role", role);
 
                 // Create authentication token for Spring Security
