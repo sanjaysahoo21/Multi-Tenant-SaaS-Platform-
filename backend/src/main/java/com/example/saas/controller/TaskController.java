@@ -70,7 +70,8 @@ public class TaskController {
 
         if (request.assignedTo != null) {
             Optional<User> userOpt = userRepository.findById(request.assignedTo);
-            if (userOpt.isPresent() && userOpt.get().getTenant().getId().equals(tenantId)) {
+            String targetTenantId = project.getTenant().getId();
+            if (userOpt.isPresent() && userOpt.get().getTenant().getId().equals(targetTenantId)) {
                 task.setAssignedTo(userOpt.get());
             } else {
                 return ResponseEntity.badRequest().body(ApiResponse.error("Invalid assigned user"));
@@ -103,7 +104,9 @@ public class TaskController {
         }
 
         Pageable pageable = PageRequest.of(page - 1, Math.min(limit, 100));
-        Page<Task> tasks = taskRepository.findByProjectIdAndTenantId(projectId, tenantId, pageable);
+        Page<Task> tasks = "SUPER_ADMIN".equals(role)
+            ? taskRepository.findByProjectId(projectId, pageable)
+            : taskRepository.findByProjectIdAndTenantId(projectId, tenantId, pageable);
 
         List<Map<String, Object>> taskList = tasks.getContent().stream()
                 .map(this::buildTaskResponse)
@@ -150,7 +153,8 @@ public class TaskController {
 
         if (request.assignedTo != null) {
             Optional<User> userOpt = userRepository.findById(request.assignedTo);
-            if (userOpt.isPresent() && userOpt.get().getTenant().getId().equals(tenantId)) {
+            String targetTenantId = task.getTenant().getId();
+            if (userOpt.isPresent() && userOpt.get().getTenant().getId().equals(targetTenantId)) {
                 task.setAssignedTo(userOpt.get());
             }
         } else if (request.assignedTo == null && request.toString().contains("assignedTo")) {

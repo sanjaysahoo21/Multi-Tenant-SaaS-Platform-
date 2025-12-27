@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, String> {
     Page<Task> findByProjectIdAndTenantId(String projectId, String tenantId, Pageable pageable);
+    Page<Task> findByProjectId(String projectId, Pageable pageable);
     long countByProjectId(String projectId);
 }

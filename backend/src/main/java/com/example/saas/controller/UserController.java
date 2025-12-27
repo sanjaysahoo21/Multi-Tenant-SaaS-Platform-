@@ -74,37 +74,37 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
-        // Regular users can only update their full name
-        if (currentRole.equals("USER") && !currentUserId.equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
-        }
-
-        if (currentRole.equals("USER") && !currentUserId.equals(userId)) {
-            // User can only update own name
+        // Regular users can only update their own display name
+        if (currentRole.equals("USER")) {
+            if (!currentUserId.equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+            }
             if (request.fullName != null) {
                 user.setFullName(request.fullName);
             }
-        } else {
-            // Admin can update multiple fields
-            if (request.fullName != null) user.setFullName(request.fullName);
-            if (request.email != null) {
-                // Check email uniqueness within tenant
-                String targetTenantId = user.getTenant() != null ? user.getTenant().getId() : tenantId;
-                Optional<User> existingUser = userRepository.findByEmailAndTenantId(request.email, targetTenantId);
-                if (existingUser.isPresent() && !existingUser.get().getId().equals(userId)) {
-                    return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error("Email already in use"));
-                }
-                user.setEmail(request.email);
+            User updated = userRepository.save(user);
+            return ResponseEntity.ok(ApiResponse.ok("User updated", buildUserResponse(updated)));
+        }
+
+        // Admins and super admins can update broader fields
+        if (request.fullName != null) user.setFullName(request.fullName);
+        if (request.email != null) {
+            // Check email uniqueness within tenant
+            String targetTenantId = user.getTenant() != null ? user.getTenant().getId() : tenantId;
+            Optional<User> existingUser = userRepository.findByEmailAndTenantId(request.email, targetTenantId);
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error("Email already in use"));
             }
-            if (request.password != null) {
-                if (request.password.length() < 8) {
-                    return ResponseEntity.badRequest().body(ApiResponse.error("Password must be at least 8 characters"));
-                }
-                user.setPasswordHash(passwordEncoder.encode(request.password));
+            user.setEmail(request.email);
+        }
+        if (request.password != null) {
+            if (request.password.length() < 8) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("Password must be at least 8 characters"));
             }
-            if (request.isActive != null && currentRole.equals("SUPER_ADMIN")) {
-                user.setIsActive(request.isActive);
-            }
+            user.setPasswordHash(passwordEncoder.encode(request.password));
+        }
+        if (request.isActive != null && currentRole.equals("SUPER_ADMIN")) {
+            user.setIsActive(request.isActive);
         }
 
         User updated = userRepository.save(user);
@@ -115,6 +115,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable String userId,
                                        @RequestAttribute("tenantId") String tenantId,
+                                       @RequestAttribute("userId") String currentUserId,
                                        @RequestAttribute("role") String role) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
@@ -126,6 +127,11 @@ public class UserController {
         // Authorization: only tenant_admin and super_admin can delete users
         if (!role.equals("SUPER_ADMIN") && !(role.equals("TENANT_ADMIN") && user.getTenant().getId().equals(tenantId))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+        }
+
+        // Tenant admin cannot delete themselves
+        if (role.equals("TENANT_ADMIN") && user.getId().equals(currentUserId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Cannot delete own account"));
         }
 
         if (!role.equals("SUPER_ADMIN") && user.getTenant() != null && !user.getTenant().getId().equals(tenantId)) {

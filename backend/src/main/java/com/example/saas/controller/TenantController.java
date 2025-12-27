@@ -78,6 +78,18 @@ public class TenantController {
             tenant.setSubscriptionPlan(Tenant.SubscriptionPlan.valueOf(request.subscriptionPlan));
             updatePlanLimits(tenant);
         }
+        if (request.maxUsers != null && role.equals("SUPER_ADMIN")) {
+            if (request.maxUsers < 1) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("maxUsers must be positive"));
+            }
+            tenant.setMaxUsers(request.maxUsers);
+        }
+        if (request.maxProjects != null && role.equals("SUPER_ADMIN")) {
+            if (request.maxProjects < 1) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("maxProjects must be positive"));
+            }
+            tenant.setMaxProjects(request.maxProjects);
+        }
 
         Tenant updated = tenantRepository.save(tenant);
         return ResponseEntity.ok(ApiResponse.ok("Tenant updated", buildTenantResponse(updated)));
@@ -232,6 +244,8 @@ public class TenantController {
         private String name;
         private String status;
         private String subscriptionPlan;
+        private Integer maxUsers;
+        private Integer maxProjects;
     }
 
     @Data
