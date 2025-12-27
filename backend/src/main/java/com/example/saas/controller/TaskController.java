@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/projects")
+@RequestMapping("/api")
 public class TaskController {
 
     private final TaskRepository taskRepository;
@@ -40,17 +40,23 @@ public class TaskController {
     }
 
     // Create task
-    @PostMapping("/{projectId}/tasks")
+    @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<?> createTask(@PathVariable String projectId,
                                        @RequestBody CreateTaskRequest request,
-                                       @RequestAttribute("tenantId") String tenantId) {
+                                       @RequestAttribute("tenantId") String tenantId,
+                                       @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Project project = projectOpt.get();
-        if (!project.getTenant().getId().equals(tenantId)) {
+        if (!"SUPER_ADMIN".equals(role) && !project.getTenant().getId().equals(tenantId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+        }
+
+        // Only tenant admin or super admin can create tasks
+        if (!"SUPER_ADMIN".equals(role) && !"TENANT_ADMIN".equals(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -80,9 +86,10 @@ public class TaskController {
     }
 
     // List project tasks
-    @GetMapping("/{projectId}/tasks")
+    @GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<?> listTasks(@PathVariable String projectId,
                                       @RequestAttribute("tenantId") String tenantId,
+                                      @RequestAttribute("role") String role,
                                       @RequestParam(defaultValue = "1") int page,
                                       @RequestParam(defaultValue = "50") int limit) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
@@ -91,7 +98,7 @@ public class TaskController {
         }
 
         Project project = projectOpt.get();
-        if (!project.getTenant().getId().equals(tenantId)) {
+        if (!"SUPER_ADMIN".equals(role) && !project.getTenant().getId().equals(tenantId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -115,17 +122,23 @@ public class TaskController {
     }
 
     // Update task
-    @PutMapping("/{taskId}")
+    @PutMapping("/tasks/{taskId}")
     public ResponseEntity<?> updateTask(@PathVariable String taskId,
                                        @RequestBody UpdateTaskRequest request,
-                                       @RequestAttribute("tenantId") String tenantId) {
+                                       @RequestAttribute("tenantId") String tenantId,
+                                       @RequestAttribute("role") String role) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
         if (taskOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Task task = taskOpt.get();
-        if (!task.getTenant().getId().equals(tenantId)) {
+        if (!"SUPER_ADMIN".equals(role) && !task.getTenant().getId().equals(tenantId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+        }
+
+        // Only admins can edit task details (non-status changes)
+        if (!"SUPER_ADMIN".equals(role) && !"TENANT_ADMIN".equals(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -149,17 +162,18 @@ public class TaskController {
     }
 
     // Update task status only
-    @PatchMapping("/{taskId}/status")
+    @PatchMapping("/tasks/{taskId}/status")
     public ResponseEntity<?> updateTaskStatus(@PathVariable String taskId,
                                              @RequestBody UpdateTaskStatusRequest request,
-                                             @RequestAttribute("tenantId") String tenantId) {
+                                             @RequestAttribute("tenantId") String tenantId,
+                                             @RequestAttribute("role") String role) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
         if (taskOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Task task = taskOpt.get();
-        if (!task.getTenant().getId().equals(tenantId)) {
+        if (!"SUPER_ADMIN".equals(role) && !task.getTenant().getId().equals(tenantId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -169,16 +183,22 @@ public class TaskController {
     }
 
     // Delete task
-    @DeleteMapping("/{taskId}")
+    @DeleteMapping("/tasks/{taskId}")
     public ResponseEntity<?> deleteTask(@PathVariable String taskId,
-                                       @RequestAttribute("tenantId") String tenantId) {
+                                       @RequestAttribute("tenantId") String tenantId,
+                                       @RequestAttribute("role") String role) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
         if (taskOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Task task = taskOpt.get();
-        if (!task.getTenant().getId().equals(tenantId)) {
+        if (!"SUPER_ADMIN".equals(role) && !task.getTenant().getId().equals(tenantId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+        }
+
+        // Only admins can delete tasks
+        if (!"SUPER_ADMIN".equals(role) && !"TENANT_ADMIN".equals(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
