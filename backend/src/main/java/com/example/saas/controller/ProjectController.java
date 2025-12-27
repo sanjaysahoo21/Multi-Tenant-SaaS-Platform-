@@ -42,8 +42,22 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<?> createProject(@RequestBody CreateProjectRequest request,
                                           @RequestAttribute("tenantId") String tenantId,
-                                          @RequestAttribute("userId") String userId) {
-        Optional<Tenant> tenantOpt = tenantRepository.findById(tenantId);
+                                          @RequestAttribute("userId") String userId,
+                                          @RequestAttribute("role") String role) {
+        String targetTenantId = tenantId;
+        if ("SUPER_ADMIN".equals(role) && request.tenantId != null && !request.tenantId.isBlank()) {
+            targetTenantId = request.tenantId;
+        }
+
+        if (!"SUPER_ADMIN".equals(role) && !"TENANT_ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+        }
+
+        if (targetTenantId == null || targetTenantId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error("Tenant id is required"));
+        }
+
+        Optional<Tenant> tenantOpt = tenantRepository.findById(targetTenantId);
         if (tenantOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -51,7 +65,7 @@ public class ProjectController {
         Tenant tenant = tenantOpt.get();
 
         // Check project limit
-        long projectCount = projectRepository.countByTenantId(tenantId);
+        long projectCount = projectRepository.countByTenantId(targetTenantId);
         if (projectCount >= tenant.getMaxProjects()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Project limit reached"));
         }
@@ -71,38 +85,33 @@ public class ProjectController {
     // List projects
     @GetMapping
     public ResponseEntity<?> listProjects(@RequestAttribute("tenantId") String tenantId,
+                                         @RequestAttribute("role") String role,
                                          @RequestParam(defaultValue = "1") int page,
                                          @RequestParam(defaultValue = "20") int limit) {
         Pageable pageable = PageRequest.of(page - 1, Math.min(limit, 100));
-        Page<Project> projects = projectRepository.findByTenantId(tenantId, pageable);
+        Page<Project> projects = "SUPER_ADMIN".equals(role)
+                ? projectRepository.findAll(pageable)
+                : projectRepository.findByTenantId(tenantId, pageable);
 
         List<Map<String, Object>> projectList = projects.getContent().stream()
                 .map(this::buildProjectResponse)
                 .collect(Collectors.toList());
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("projects", projectList);
-        response.put("total", projects.getTotalElements());
-        Map<String, Object> pagination = new HashMap<>();
-        pagination.put("currentPage", page);
-        pagination.put("totalPages", projects.getTotalPages());
-        pagination.put("limit", limit);
-        response.put("pagination", pagination);
-
-        return ResponseEntity.ok(ApiResponse.ok(response));
+        return ResponseEntity.ok(ApiResponse.ok(projectList));
     }
 
     // Get project
     @GetMapping("/{projectId}")
     public ResponseEntity<?> getProject(@PathVariable String projectId,
-                                       @RequestAttribute("tenantId") String tenantId) {
+                                       @RequestAttribute("tenantId") String tenantId,
+                                       @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Project project = projectOpt.get();
-        if (!project.getTenant().getId().equals(tenantId)) {
+        if (!"SUPER_ADMIN".equals(role) && !project.getTenant().getId().equals(tenantId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -114,14 +123,16 @@ public class ProjectController {
     public ResponseEntity<?> updateProject(@PathVariable String projectId,
                                           @RequestBody UpdateProjectRequest request,
                                           @RequestAttribute("tenantId") String tenantId,
-                                          @RequestAttribute("userId") String userId) {
+                                          @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Project project = projectOpt.get();
-        if (!project.getTenant().getId().equals(tenantId)) {
+        // Authorization: only tenant_admin and super_admin can update projects
+        if (!"SUPER_ADMIN".equals(role)
+                && !("TENANT_ADMIN".equals(role) && project.getTenant().getId().equals(tenantId))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -136,14 +147,17 @@ public class ProjectController {
     // Delete project
     @DeleteMapping("/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable String projectId,
-                                          @RequestAttribute("tenantId") String tenantId) {
+                                          @RequestAttribute("tenantId") String tenantId,
+                                          @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Project project = projectOpt.get();
-        if (!project.getTenant().getId().equals(tenantId)) {
+        // Authorization: only tenant_admin and super_admin can delete projects
+        if (!"SUPER_ADMIN".equals(role)
+                && !("TENANT_ADMIN".equals(role) && project.getTenant().getId().equals(tenantId))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -177,6 +191,7 @@ public class ProjectController {
     public static class CreateProjectRequest {
         private String name;
         private String description;
+        private String tenantId; // used only by super admin when creating on behalf of a tenant
     }
 
     @Data
