@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Edit2, Trash2 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import api from '../../api/axios';
 import './Users.css';
@@ -203,7 +204,7 @@ function Users() {
                         onClick={() => handleOpenModal(user)}
                         title="Edit"
                       >
-                        ✏️
+                        <Edit2 size={16} />
                       </button>
                       {user.id !== currentUser.id && (
                         <button
@@ -211,7 +212,7 @@ function Users() {
                           onClick={() => handleDelete(user.id)}
                           title="Delete"
                         >
-                          🗑️
+                          <Trash2 size={16} />
                         </button>
                       )}
                     </div>

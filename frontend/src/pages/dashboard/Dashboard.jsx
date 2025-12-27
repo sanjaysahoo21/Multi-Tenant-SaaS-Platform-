@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { FolderOpen, CheckSquare, Users, Building2 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import api from '../../api/axios';
 import './Dashboard.css';
@@ -70,20 +71,20 @@ function Dashboard() {
         ) : (
           <div className="stats-grid">
             <div className="stat-card" onClick={() => navigate('/projects')}>
-              <div className="stat-icon">📁</div>
+              <div className="stat-icon"><FolderOpen size={32} /></div>
               <div className="stat-value">{stats.projects}</div>
               <div className="stat-label">Projects</div>
             </div>
 
             <div className="stat-card">
-              <div className="stat-icon">✓</div>
+              <div className="stat-icon"><CheckSquare size={32} /></div>
               <div className="stat-value">{stats.tasks}</div>
               <div className="stat-label">Tasks</div>
             </div>
 
             {(user?.role === 'TENANT_ADMIN' || user?.role === 'SUPER_ADMIN') && (
               <div className="stat-card" onClick={() => navigate('/users')}>
-                <div className="stat-icon">👥</div>
+                <div className="stat-icon"><Users size={32} /></div>
                 <div className="stat-value">{stats.users}</div>
                 <div className="stat-label">Users</div>
               </div>
@@ -91,7 +92,7 @@ function Dashboard() {
 
             {user?.role !== 'SUPER_ADMIN' && (
               <div className="stat-card">
-                <div className="stat-icon">🏢</div>
+                <div className="stat-icon"><Building2 size={32} /></div>
                 <div className="stat-value">{user?.tenant?.subscriptionPlan}</div>
                 <div className="stat-label">Plan</div>
               </div>
@@ -103,12 +104,12 @@ function Dashboard() {
           <h2>Quick Actions</h2>
           <div className="actions-grid">
             <button className="action-btn" onClick={() => navigate('/projects')}>
-              <span className="action-icon">📁</span>
+              <span className="action-icon"><FolderOpen size={20} /></span>
               <span>View Projects</span>
             </button>
             {(user?.role === 'TENANT_ADMIN' || user?.role === 'SUPER_ADMIN') && (
               <button className="action-btn" onClick={() => navigate('/users')}>
-                <span className="action-icon">👥</span>
+                <span className="action-icon"><Users size={20} /></span>
                 <span>Manage Users</span>
               </button>
             )}

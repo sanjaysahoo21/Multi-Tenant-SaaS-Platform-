@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Edit2, Trash2 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
@@ -389,12 +390,12 @@ function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
         </select>
         {onEdit && (
           <button className="btn-icon" onClick={() => onEdit(task)} title="Edit">
-            ✏️
+            <Edit2 size={16} />
           </button>
         )}
         {onDelete && (
           <button className="btn-icon" onClick={() => onDelete(task.id)} title="Delete">
-            🗑️
+            <Trash2 size={16} />
           </button>
         )}
       </div>

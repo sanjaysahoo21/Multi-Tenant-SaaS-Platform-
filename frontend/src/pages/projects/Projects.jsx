@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Edit2, Trash2 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
@@ -185,14 +186,14 @@ function Projects() {
                         onClick={() => handleOpenModal(project)}
                         title="Edit"
                       >
-                        ✏️
+                        <Edit2 size={16} />
                       </button>
                       <button
                         className="btn-icon"
                         onClick={() => handleDelete(project.id)}
                         title="Delete"
                       >
-                        🗑️
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   )}
