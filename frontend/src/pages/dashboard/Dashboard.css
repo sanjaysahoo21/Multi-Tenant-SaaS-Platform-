@@ -1,18 +1,20 @@
 .page-container h1 {
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
 
 .subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 30px;
 }
 
 .loading-card {
   text-align: center;
   padding: 40px;
-  background: white;
+  background: var(--surface);
   border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .stats-grid {
@@ -23,35 +25,46 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   padding: 30px;
   border-radius: 8px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  border-color: var(--primary);
+}
+
+.stat-card:focus-visible {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 .stat-icon {
   font-size: 48px;
   margin-bottom: 10px;
+  color: var(--text-primary);
 }
 
 .stat-value {
   font-size: 32px;
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 5px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -61,7 +74,7 @@
 }
 
 .quick-actions h2 {
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 20px;
 }
 
@@ -72,25 +85,43 @@
 }
 
 .action-btn {
-  background: white;
+  background: var(--surface);
   padding: 20px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 16px;
-  transition: all 0.2s;
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.action-btn span {
+  color: inherit;
 }
 
 .action-btn:hover {
-  border-color: #667eea;
-  background: #f8f9ff;
+  border-color: var(--primary);
+  background: var(--surface-muted);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.action-btn:focus-visible {
+  border-color: var(--primary);
+  background: var(--surface-muted);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 .action-icon {
   font-size: 24px;
+  color: inherit;
 }
 
 .info-section {
@@ -98,7 +129,7 @@
 }
 
 .info-section h3 {
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 20px;
 }
 
@@ -106,7 +137,7 @@
   display: flex;
   justify-content: space-between;
   padding: 15px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border);
 }
 
 .info-row:last-child {
@@ -115,11 +146,11 @@
 
 .info-label {
   font-weight: 500;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .info-value {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .status-badge {
@@ -128,19 +159,31 @@
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .status-badge.active {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .status-badge.trial {
-  background: #fff3e0;
-  color: #ef6c00;
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 
 .status-badge.suspended {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.status-badge:hover,
+.status-badge:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

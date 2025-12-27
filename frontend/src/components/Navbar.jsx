@@ -1,9 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 function Navbar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -15,7 +18,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/dashboard" className="nav-brand">
-          WorkStack
+          <span className="logo-mark">WS</span> WorkStack
         </Link>
 
         <div className="nav-menu">
@@ -30,6 +33,14 @@ function Navbar() {
         </div>
 
         <div className="nav-user">
+          <button
+            className="icon-btn"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <span className="user-info">
             {user?.fullName} ({user?.role})
           </span>

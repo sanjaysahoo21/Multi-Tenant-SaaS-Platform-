@@ -1,8 +1,9 @@
 .users-table-container {
-  background: white;
+  background: var(--surface);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .users-table {
@@ -11,25 +12,25 @@
 }
 
 .users-table thead {
-  background: #f8f9fa;
+  background: var(--surface-muted);
 }
 
 .users-table th {
   text-align: left;
   padding: 15px 20px;
   font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #e0e0e0;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border);
 }
 
 .users-table td {
   padding: 15px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  color: #666;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
 }
 
 .users-table tbody tr:hover {
-  background: #f8f9fa;
+  background: var(--surface-muted);
 }
 
 .role-badge {
@@ -39,21 +40,36 @@
   font-weight: 500;
   text-transform: uppercase;
   display: inline-block;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .role-badge.tenant_admin {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--info-soft);
+  color: var(--info);
 }
 
 .role-badge.user {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .status-badge.inactive {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.role-badge:hover,
+.role-badge:focus-visible,
+.status-badge.inactive:hover,
+.status-badge.inactive:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.users-table tbody tr {
+  transition: background 0.15s ease;
 }
 
 .table-actions {

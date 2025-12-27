@@ -42,7 +42,7 @@ function Register() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>WorkStack</h1>
+        <h1><span className="logo-mark">WS</span> WorkStack</h1>
         <h2>Create Your Tenant</h2>
 
         {error && <div className="error-message">{error}</div>}
@@ -73,7 +73,7 @@ function Register() {
               required
               disabled={loading}
             />
-            <small style={{color: '#666'}}>Your URL will be: your-company.saas.com</small>
+            <small style={{ color: 'var(--text-secondary)' }}>Your URL will be: your-company.saas.com</small>
           </div>
 
           <div className="form-group">

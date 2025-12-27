@@ -1,8 +1,9 @@
 .tenants-table-container {
-  background: white;
+  background: var(--surface);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .tenants-table {
@@ -11,41 +12,46 @@
 }
 
 .tenants-table thead {
-  background: #f8f9fa;
+  background: var(--surface-muted);
 }
 
 .tenants-table th {
   text-align: left;
   padding: 15px 20px;
   font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #e0e0e0;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border);
 }
 
 .tenants-table td {
   padding: 15px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  color: #555;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
   vertical-align: middle;
 }
 
 .tenants-table tbody tr:hover {
-  background: #f8f9fa;
+  background: var(--surface-muted);
+}
+
+.tenants-table tbody tr {
+  transition: background 0.15s ease;
 }
 
 .tenants-table select {
   padding: 8px 10px;
   border-radius: 6px;
-  border: 1px solid #d0d7de;
-  background: #fff;
+  border: 1px solid var(--border);
+  background: var(--surface);
   font-weight: 600;
 }
 
 .success-message {
-  background: #e8f5e9;
-  border: 1px solid #c8e6c9;
-  color: #2e7d32;
+  background: var(--success-soft);
+  border: 1px solid var(--success);
+  color: var(--success);
   padding: 12px 14px;
   border-radius: 8px;
   margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }

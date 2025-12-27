@@ -29,7 +29,7 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>WorkStack</h1>
+        <h1><span className="logo-mark">WS</span> WorkStack</h1>
         <h2>Sign In</h2>
 
         {error && <div className="error-message">{error}</div>}
@@ -66,12 +66,6 @@ function Login() {
 
         <div className="auth-footer">
           <p>Don't have an account? <Link to="/register">Create a tenant</Link></p>
-        </div>
-
-        <div className="demo-credentials">
-          <h3>Demo Credentials:</h3>
-          <p><strong>Admin:</strong> admin@demo.com / Demo@123</p>
-          <p><strong>User:</strong> user1@demo.com / User@123</p>
         </div>
       </div>
     </div>
