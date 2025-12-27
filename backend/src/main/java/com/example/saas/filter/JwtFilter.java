@@ -13,6 +13,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * JWT authentication filter that extracts and validates JWT tokens
+ * Sets userId, tenantId, and role as request attributes for downstream controllers
+ */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
