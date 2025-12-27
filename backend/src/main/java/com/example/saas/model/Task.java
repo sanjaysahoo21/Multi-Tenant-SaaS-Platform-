@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Task entity with project and tenant associations
+ * Supports priority levels, status tracking, and user assignment
+ */
 @Entity
 @Table(name = "tasks", indexes = {
     @Index(name = "idx_tenant_project", columnList = "tenant_id, project_id")
