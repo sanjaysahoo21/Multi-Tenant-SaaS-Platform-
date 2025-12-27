@@ -356,6 +356,61 @@ FRONTEND_URL=http://localhost:3000
 VITE_API_URL=http://localhost:5000/api
 ```
 
+## 🔧 Troubleshooting
+
+### Fresh Clone: Login/Registration Fails
+
+**Problem:** After cloning and running `docker compose up`, login shows "Login failed" or registration shows "Registration failed".
+
+**Root Causes:**
+1. **Old Docker images cached** – images built before fixes were applied
+2. **Wrong credentials** – using example creds from `submission.json` instead of seeded accounts
+3. **Missing database migrations** – Flyway hasn't run yet
+
+**Solution:**
+
+1. **Clean rebuild** (removes old images and volumes):
+```bash
+git pull
+
+docker compose down -v
+docker image rm multi-tenant-saas-platform-frontend -ErrorAction SilentlyContinue
+docker image rm multi-tenant-saas-platform-backend -ErrorAction SilentlyContinue
+
+docker compose build --no-cache
+docker compose up -d
+```
+
+2. **Wait for database to initialize** (~30 seconds):
+```bash
+docker compose ps
+# All services should show "Up" or "Healthy"
+```
+
+3. **Verify backend health**:
+```bash
+curl http://localhost:5000/api/health
+# Response: {"success":true,"data":{"status":"ok","database":"connected"}}
+```
+
+4. **Use correct demo credentials** (seeded by Flyway):
+   - **Super Admin**: `superadmin@system.com` / `Admin@123`
+   - **Tenant Admin**: `admin@demo.com` / `Demo@123`
+   - **Demo User**: `user1@demo.com` / `User@123`
+
+5. **Clear browser storage** and refresh:
+   - Open DevTools → Application → Local Storage → delete `token`
+   - Refresh `http://localhost:3000`
+
+**If Still Failing:**
+
+- Check backend logs: `docker compose logs backend -n 200`
+- Check frontend logs: `docker compose logs frontend -n 200`
+- Verify database is healthy: `docker compose logs database -n 50`
+- Ensure you're on the latest commit: `git log --oneline -1`
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow these guidelines:
