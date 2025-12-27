@@ -3,6 +3,10 @@ package com.example.saas.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * User entity representing platform users with tenant association
+ * Supports three role levels: SUPER_ADMIN, TENANT_ADMIN, and USER
+ */
 @Entity
 @Table(name = "users", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"tenant_id", "email"})
