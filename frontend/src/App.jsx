@@ -7,6 +7,7 @@ import Dashboard from './pages/dashboard/Dashboard';
 import Projects from './pages/projects/Projects';
 import ProjectDetails from './pages/projects/ProjectDetails';
 import Users from './pages/users/Users';
+import Tenants from './pages/tenants/Tenants';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -62,6 +63,11 @@ function AppRoutes() {
         <Route path="/users" element={
           <PrivateRoute>
             <Users />
+          </PrivateRoute>
+        } />
+        <Route path="/tenants" element={
+          <PrivateRoute>
+            <Tenants />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />

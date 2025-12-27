@@ -21,8 +21,11 @@ function Navbar() {
         <div className="nav-menu">
           <Link to="/dashboard" className="nav-link">Dashboard</Link>
           <Link to="/projects" className="nav-link">Projects</Link>
-          {user?.role === 'TENANT_ADMIN' && (
+          {(user?.role === 'TENANT_ADMIN' || user?.role === 'SUPER_ADMIN') && (
             <Link to="/users" className="nav-link">Users</Link>
+          )}
+          {user?.role === 'SUPER_ADMIN' && (
+            <Link to="/tenants" className="nav-link">Tenants</Link>
           )}
         </div>
 
