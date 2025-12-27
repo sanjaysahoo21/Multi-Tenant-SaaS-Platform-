@@ -42,7 +42,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
-        if (user.getTenant() != null && !user.getTenant().getId().equals(tenantId)) {
+        if (!currentRole.equals("SUPER_ADMIN") && user.getTenant() != null && !user.getTenant().getId().equals(tenantId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -70,7 +70,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
-        if (user.getTenant() != null && !user.getTenant().getId().equals(tenantId)) {
+        if (!currentRole.equals("SUPER_ADMIN") && user.getTenant() != null && !user.getTenant().getId().equals(tenantId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
@@ -89,7 +89,8 @@ public class UserController {
             if (request.fullName != null) user.setFullName(request.fullName);
             if (request.email != null) {
                 // Check email uniqueness within tenant
-                Optional<User> existingUser = userRepository.findByEmailAndTenantId(request.email, tenantId);
+                String targetTenantId = user.getTenant() != null ? user.getTenant().getId() : tenantId;
+                Optional<User> existingUser = userRepository.findByEmailAndTenantId(request.email, targetTenantId);
                 if (existingUser.isPresent() && !existingUser.get().getId().equals(userId)) {
                     return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error("Email already in use"));
                 }
@@ -127,7 +128,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
-        if (user.getTenant() != null && !user.getTenant().getId().equals(tenantId)) {
+        if (!role.equals("SUPER_ADMIN") && user.getTenant() != null && !user.getTenant().getId().equals(tenantId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
