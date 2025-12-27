@@ -3,6 +3,10 @@ package com.example.saas.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Tenant entity for multi-tenant isolation
+ * Manages subscription plans and resource limits per tenant
+ */
 @Entity
 @Table(name = "tenants")
 public class Tenant {
