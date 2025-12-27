@@ -38,7 +38,14 @@ public class ProjectController {
         this.taskRepository = taskRepository;
     }
 
-    // Create project
+    /**
+     * Create a new project
+     * @param request Project creation request containing name, description, owner
+     * @param tenantId Tenant ID from JWT token
+     * @param userId User ID from JWT token
+     * @param role User role from JWT token
+     * @return Created project details or error response
+     */
     @PostMapping
     public ResponseEntity<?> createProject(@RequestBody CreateProjectRequest request,
                                           @RequestAttribute("tenantId") String tenantId,
