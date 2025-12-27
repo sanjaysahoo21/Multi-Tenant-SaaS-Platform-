@@ -132,31 +132,31 @@ After starting the services, you can login with these demo accounts:
 
 All services include health checks:
 
-- **Backend:** http://localhost:8080/api/health
+- **Backend:** http://localhost:5000/api/health
 - **PostgreSQL:** Automatic pg_isready check
 
 ## Troubleshooting
 
 ### Backend fails to start:
-1. Check if PostgreSQL is healthy: `docker-compose ps`
-2. View backend logs: `docker-compose logs backend`
-3. Ensure port 8080 is not in use
+1. Check if PostgreSQL is healthy: `docker compose ps`
+2. View backend logs: `docker compose logs backend`
+3. Ensure port 5000 is not in use
 
 ### Frontend cannot connect to backend:
-1. Check backend health: curl http://localhost:8080/api/health
+1. Check backend health: curl http://localhost:5000/api/health
 2. Check nginx configuration in frontend/nginx.conf
-3. View frontend logs: `docker-compose logs frontend`
+3. View frontend logs: `docker compose logs frontend`
 
 ### Database connection issues:
-1. Verify PostgreSQL is running: `docker-compose ps postgres`
-2. Check database logs: `docker-compose logs postgres`
+1. Verify PostgreSQL is running: `docker compose ps database`
+2. Check database logs: `docker compose logs database`
 3. Verify credentials in docker-compose.yml
 
 ### Port conflicts:
-If ports 3000, 8080, or 5432 are already in use, modify the port mappings in docker-compose.yml:
+If ports 3000, 5000, or 5432 are already in use, modify the port mappings in docker-compose.yml:
 ```yaml
 ports:
-  - "8081:8080"  # Change 8080 to 8081
+  - "5001:5000"  # Change 5000 to 5001
 ```
 
 ## Production Considerations

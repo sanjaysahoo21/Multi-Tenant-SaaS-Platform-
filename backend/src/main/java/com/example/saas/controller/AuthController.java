@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     // Register Tenant
-    @PostMapping("/register-tenant")
+    @PostMapping({"/register-tenant", "/register"})
     public ResponseEntity<?> registerTenant(@RequestBody RegisterTenantRequest request) {
         // Validate input
         if (request.tenantName == null || request.tenantName.isBlank() ||
