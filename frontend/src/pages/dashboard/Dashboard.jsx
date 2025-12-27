@@ -19,15 +19,17 @@ function Dashboard() {
 
   const loadStats = async () => {
     try {
-      const [projectsRes, tasksRes, usersRes] = await Promise.all([
+      const [projectsRes, usersRes] = await Promise.all([
         api.get('/projects'),
-        api.get(`/projects/${user.id}/tasks`).catch(() => ({ data: { data: [] } })),
         user.role === 'TENANT_ADMIN' ? api.get(`/tenants/${user.tenant.id}/users`) : Promise.resolve({ data: { data: [] } })
       ]);
 
+      const projectList = Array.isArray(projectsRes.data.data) ? projectsRes.data.data : [];
+      const taskCount = projectList.reduce((sum, p) => sum + (p.taskCount || 0), 0);
+
       setStats({
-        projects: projectsRes.data.data.length,
-        tasks: tasksRes.data.data.length,
+        projects: projectList.length,
+        tasks: taskCount,
         users: usersRes.data.data.length
       });
     } catch (error) {
