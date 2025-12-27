@@ -21,23 +21,22 @@ function Users() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (currentUser?.role === 'TENANT_ADMIN') {
+    if (currentUser?.role === 'TENANT_ADMIN' || currentUser?.role === 'SUPER_ADMIN') {
       loadUsers();
     }
   }, [currentUser]);
 
   const loadUsers = async () => {
     try {
-      if (!currentUser?.tenant?.id) {
-        setError('Tenant information not available');
-        setLoading(false);
-        return;
-      }
       setError('');
       setLoading(true);
-      const response = await api.get(`/tenants/${currentUser.tenant.id}/users`);
-      console.log('Users loaded:', response.data.data);
-      setUsers(Array.isArray(response.data.data) ? response.data.data : []);
+
+      const response = currentUser?.role === 'SUPER_ADMIN'
+        ? await api.get('/users')
+        : await api.get(`/tenants/${currentUser.tenant.id}/users`);
+
+      const data = response?.data?.data;
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to load users:', error);
       setError('Failed to load users');
@@ -130,7 +129,9 @@ function Users() {
     }
   };
 
-  if (currentUser?.role !== 'TENANT_ADMIN') {
+  const canManageUsers = currentUser?.role === 'TENANT_ADMIN' || currentUser?.role === 'SUPER_ADMIN';
+
+  if (!canManageUsers) {
     return (
       <div className="page-container">
         <Navbar />
@@ -154,26 +155,17 @@ function Users() {
     );
   }
 
-  if (currentUser?.role !== 'TENANT_ADMIN') {
-    return (
-      <div className="page-container">
-        <Navbar />
-        <div className="content">
-          <div className="error-message">You do not have permission to view this page. Only Tenant Admins can manage users.</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="page-container">
       <Navbar />
       <div className="content">
         <div className="page-header">
           <h1>Users</h1>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            + Add User
-          </button>
+          {currentUser?.role === 'TENANT_ADMIN' && (
+            <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+              + Add User
+            </button>
+          )}
         </div>
 
         {error && <div className="error-message">{error}</div>}
