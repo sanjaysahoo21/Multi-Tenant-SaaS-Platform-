@@ -2,6 +2,10 @@ package com.example.saas.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+/**
+ * Standard API response wrapper for consistent response format
+ * @param <T> The type of data being returned
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
     private boolean success;
