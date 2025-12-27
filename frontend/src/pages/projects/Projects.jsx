@@ -15,7 +15,8 @@ function Projects() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    status: 'ACTIVE'
+    status: 'ACTIVE',
+    tenantId: ''
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -49,11 +50,12 @@ function Projects() {
       setFormData({
         name: project.name,
         description: project.description || '',
-        status: project.status
+        status: project.status,
+        tenantId: project.tenantId || ''
       });
     } else {
       setEditingProject(null);
-      setFormData({ name: '', description: '', status: 'ACTIVE' });
+      setFormData({ name: '', description: '', status: 'ACTIVE', tenantId: '' });
     }
     setShowModal(true);
     setError('');
@@ -83,6 +85,12 @@ function Projects() {
         setError('You are not authorized to manage projects');
         return;
       }
+      if (isAdmin && user?.role === 'SUPER_ADMIN' && !editingProject && !formData.tenantId) {
+        setError('Tenant ID is required when creating as Super Admin');
+        setSubmitting(false);
+        return;
+      }
+
       if (editingProject) {
         await api.put(`/projects/${editingProject.id}`, formData);
       } else {
@@ -201,6 +209,21 @@ function Projects() {
               {error && <div className="error-message">{error}</div>}
               
               <form onSubmit={handleSubmit}>
+                {user?.role === 'SUPER_ADMIN' && (
+                  <div className="form-group">
+                    <label htmlFor="tenantId">Tenant ID *</label>
+                    <input
+                      type="text"
+                      id="tenantId"
+                      name="tenantId"
+                      value={formData.tenantId}
+                      onChange={handleChange}
+                      required
+                    />
+                    <small>Provide the tenant ID to associate the project.</small>
+                  </div>
+                )}
+
                 <div className="form-group">
                   <label htmlFor="name">Project Name *</label>
                   <input
