@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>multi-tenant-saas</artifactId>
+    <artifactId>workstack</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Multi-Tenant SaaS Platform</name>
-    <description>Multi-tenant SaaS application for project and task management</description>
+    <name>WorkStack</name>
+    <description>Multi-tenant SaaS platform for project and task management</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

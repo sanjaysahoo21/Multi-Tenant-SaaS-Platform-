@@ -1,6 +1,6 @@
-# Multi-Tenant SaaS Platform - Docker Deployment
+# WorkStack - Docker Deployment
 
-This document provides instructions for deploying the Multi-Tenant SaaS Platform using Docker.
+This document provides instructions for deploying WorkStack using Docker.
 
 ## Prerequisites
 

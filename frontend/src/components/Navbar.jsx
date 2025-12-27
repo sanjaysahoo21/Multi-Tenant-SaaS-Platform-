@@ -15,7 +15,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/dashboard" className="nav-brand">
-          Multi-Tenant SaaS
+          WorkStack
         </Link>
 
         <div className="nav-menu">

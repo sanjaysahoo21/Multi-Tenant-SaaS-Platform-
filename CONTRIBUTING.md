@@ -1,4 +1,4 @@
-# Contributing to Multi-Tenant SaaS Platform
+# Contributing to WorkStack
 
 Thank you for considering contributing to our project! Here are some guidelines to help you get started.
 

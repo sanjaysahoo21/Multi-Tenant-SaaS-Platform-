@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Security configuration for the Multi-Tenant SaaS Platform
+ * Security configuration for WorkStack
  * Configures JWT-based stateless authentication and authorization
  */
 @Configuration

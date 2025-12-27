@@ -1,6 +1,6 @@
-# Multi-Tenant SaaS Platform
+# WorkStack
 
-A production-ready, enterprise-grade Multi-Tenant SaaS platform built with Spring Boot, React, and PostgreSQL. Features include tenant isolation, role-based access control, JWT authentication, and comprehensive project/task management capabilities.
+A production-ready, enterprise-grade multi-tenant SaaS platform built with Spring Boot, React, and PostgreSQL. Features include tenant isolation, role-based access control, JWT authentication, and comprehensive project/task management capabilities.
 
 ## 🚀 Features
 
@@ -141,7 +141,7 @@ The models can be updated to use explicit getters/setters instead of Lombok anno
 **1. Clone the repository**
 ```bash
 git clone https://github.com/sanjaysahoo21/Multi-Tenant-SaaS-Platform-.git
-cd Multi-Tenant-SaaS-Platform-
+cd Multi-Tenant-SaaS-Platform
 ```
 
 **2. Backend Setup**
@@ -295,7 +295,7 @@ mvn verify
 ## 📦 Project Structure
 
 ```
-Multi-Tenant-SaaS-Platform/
+WorkStack/
 ├── backend/
 │   ├── src/
 │   │   ├── main/
