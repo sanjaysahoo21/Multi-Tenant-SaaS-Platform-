@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
 import './Projects.css';
 
 function Projects() {
+  const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -38,7 +40,10 @@ function Projects() {
     }
   };
 
+  const isAdmin = user?.role === 'TENANT_ADMIN' || user?.role === 'SUPER_ADMIN';
+
   const handleOpenModal = (project = null) => {
+    if (!isAdmin) return;
     if (project) {
       setEditingProject(project);
       setFormData({
@@ -74,6 +79,10 @@ function Projects() {
     setSubmitting(true);
 
     try {
+      if (!isAdmin) {
+        setError('You are not authorized to manage projects');
+        return;
+      }
       if (editingProject) {
         await api.put(`/projects/${editingProject.id}`, formData);
       } else {
@@ -97,6 +106,10 @@ function Projects() {
     }
 
     try {
+      if (!isAdmin) {
+        alert('You are not authorized to delete projects');
+        return;
+      }
       await api.delete(`/projects/${id}`);
       await loadProjects();
     } catch (err) {
@@ -121,9 +134,11 @@ function Projects() {
       <div className="content">
         <div className="page-header">
           <h1>Projects</h1>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            + New Project
-          </button>
+          {isAdmin && (
+            <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+              + New Project
+            </button>
+          )}
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -155,22 +170,24 @@ function Projects() {
                   >
                     View Details
                   </button>
-                  <div className="project-actions">
-                    <button
-                      className="btn-icon"
-                      onClick={() => handleOpenModal(project)}
-                      title="Edit"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className="btn-icon"
-                      onClick={() => handleDelete(project.id)}
-                      title="Delete"
-                    >
-                      🗑️
-                    </button>
-                  </div>
+                  {isAdmin && (
+                    <div className="project-actions">
+                      <button
+                        className="btn-icon"
+                        onClick={() => handleOpenModal(project)}
+                        title="Edit"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="btn-icon"
+                        onClick={() => handleDelete(project.id)}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
