@@ -19,6 +19,25 @@ function Dashboard() {
 
   const loadStats = async () => {
     try {
+      if (user.role === 'SUPER_ADMIN') {
+        const [projectsRes, tasksRes, usersRes] = await Promise.all([
+          api.get('/projects'),
+          api.get('/tasks'),
+          api.get('/users')
+        ]);
+
+        const projectList = Array.isArray(projectsRes.data.data) ? projectsRes.data.data : [];
+        const taskTotal = tasksRes?.data?.data?.total ?? (Array.isArray(tasksRes?.data?.data?.tasks) ? tasksRes.data.data.tasks.length : 0);
+        const usersTotal = Array.isArray(usersRes?.data?.data) ? usersRes.data.data.length : 0;
+
+        setStats({
+          projects: projectList.length,
+          tasks: taskTotal,
+          users: usersTotal
+        });
+        return;
+      }
+
       const [projectsRes, usersRes] = await Promise.all([
         api.get('/projects'),
         user.role === 'TENANT_ADMIN' ? api.get(`/tenants/${user.tenant.id}/users`) : Promise.resolve({ data: { data: [] } })
@@ -62,7 +81,7 @@ function Dashboard() {
               <div className="stat-label">Tasks</div>
             </div>
 
-            {user?.role === 'TENANT_ADMIN' && (
+            {(user?.role === 'TENANT_ADMIN' || user?.role === 'SUPER_ADMIN') && (
               <div className="stat-card" onClick={() => navigate('/users')}>
                 <div className="stat-icon">👥</div>
                 <div className="stat-value">{stats.users}</div>
@@ -70,11 +89,13 @@ function Dashboard() {
               </div>
             )}
 
-            <div className="stat-card">
-              <div className="stat-icon">🏢</div>
-              <div className="stat-value">{user?.tenant?.subscriptionPlan}</div>
-              <div className="stat-label">Plan</div>
-            </div>
+            {user?.role !== 'SUPER_ADMIN' && (
+              <div className="stat-card">
+                <div className="stat-icon">🏢</div>
+                <div className="stat-value">{user?.tenant?.subscriptionPlan}</div>
+                <div className="stat-label">Plan</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -85,7 +106,7 @@ function Dashboard() {
               <span className="action-icon">📁</span>
               <span>View Projects</span>
             </button>
-            {user?.role === 'TENANT_ADMIN' && (
+            {(user?.role === 'TENANT_ADMIN' || user?.role === 'SUPER_ADMIN') && (
               <button className="action-btn" onClick={() => navigate('/users')}>
                 <span className="action-icon">👥</span>
                 <span>Manage Users</span>
@@ -94,33 +115,35 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="info-section">
-          <div className="card">
-            <h3>Tenant Information</h3>
-            <div className="info-row">
-              <span className="info-label">Company:</span>
-              <span className="info-value">{user?.tenant?.name}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Subdomain:</span>
-              <span className="info-value">{user?.tenant?.subdomain}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Status:</span>
-              <span className={`status-badge ${(user?.tenant?.status || '').toLowerCase()}`}>
-                {user?.tenant?.status || 'UNKNOWN'}
-              </span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Max Users:</span>
-              <span className="info-value">{user?.tenant?.maxUsers}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Max Projects:</span>
-              <span className="info-value">{user?.tenant?.maxProjects}</span>
+        {user?.role !== 'SUPER_ADMIN' && (
+          <div className="info-section">
+            <div className="card">
+              <h3>Tenant Information</h3>
+              <div className="info-row">
+                <span className="info-label">Company:</span>
+                <span className="info-value">{user?.tenant?.name}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Subdomain:</span>
+                <span className="info-value">{user?.tenant?.subdomain}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Status:</span>
+                <span className={`status-badge ${(user?.tenant?.status || '').toLowerCase()}`}>
+                  {user?.tenant?.status || 'UNKNOWN'}
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Max Users:</span>
+                <span className="info-value">{user?.tenant?.maxUsers}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Max Projects:</span>
+                <span className="info-value">{user?.tenant?.maxProjects}</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
