@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
 import './ProjectDetails.css';
 
 function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
@@ -35,9 +37,13 @@ function ProjectDetails() {
         api.get(`/tenants/${localStorage.getItem('tenantId')}/users`).catch(() => ({ data: { data: [] } }))
       ]);
 
-      setProject(projectRes.data.data);
-      setTasks(tasksRes.data.data);
-      setUsers(usersRes.data.data);
+      const projectData = projectRes.data.data;
+      const tasksData = tasksRes.data.data;
+      const usersData = usersRes.data.data;
+
+      setProject(projectData);
+      setTasks(Array.isArray(tasksData) ? tasksData : (tasksData?.tasks || []));
+      setUsers(Array.isArray(usersData) ? usersData : (usersData?.users || []));
     } catch (error) {
       console.error('Failed to load data:', error);
       setError('Failed to load project data');
@@ -46,7 +52,13 @@ function ProjectDetails() {
     }
   };
 
+  const isAdmin = user?.role === 'TENANT_ADMIN' || user?.role === 'SUPER_ADMIN';
+
   const handleOpenModal = (task = null) => {
+    if (!isAdmin) {
+      setError('You are not authorized to create or edit tasks');
+      return;
+    }
     if (task) {
       setEditingTask(task);
       setFormData({
@@ -90,6 +102,10 @@ function ProjectDetails() {
     setError('');
 
     try {
+      if (!isAdmin) {
+        setError('You are not authorized to create or edit tasks');
+        return;
+      }
       const taskData = {
         ...formData,
         assignedToId: formData.assignedToId || null,
@@ -114,6 +130,10 @@ function ProjectDetails() {
     }
 
     try {
+      if (!isAdmin) {
+        alert('You are not authorized to delete tasks');
+        return;
+      }
       await api.delete(`/tasks/${taskId}`);
       await loadData();
     } catch (err) {
@@ -161,9 +181,11 @@ function ProjectDetails() {
 
         <div className="page-header">
           <h2>Tasks</h2>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            + New Task
-          </button>
+          {isAdmin && (
+            <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+              + New Task
+            </button>
+          )}
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -184,8 +206,8 @@ function ProjectDetails() {
                   <TaskCard 
                     key={task.id} 
                     task={task} 
-                    onEdit={handleOpenModal}
-                    onDelete={handleDeleteTask}
+                    onEdit={isAdmin ? handleOpenModal : null}
+                    onDelete={isAdmin ? handleDeleteTask : null}
                     onStatusChange={handleStatusChange}
                   />
                 ))}
@@ -199,8 +221,8 @@ function ProjectDetails() {
                   <TaskCard 
                     key={task.id} 
                     task={task} 
-                    onEdit={handleOpenModal}
-                    onDelete={handleDeleteTask}
+                    onEdit={isAdmin ? handleOpenModal : null}
+                    onDelete={isAdmin ? handleDeleteTask : null}
                     onStatusChange={handleStatusChange}
                   />
                 ))}
@@ -214,8 +236,8 @@ function ProjectDetails() {
                   <TaskCard 
                     key={task.id} 
                     task={task} 
-                    onEdit={handleOpenModal}
-                    onDelete={handleDeleteTask}
+                    onEdit={isAdmin ? handleOpenModal : null}
+                    onDelete={isAdmin ? handleDeleteTask : null}
                     onStatusChange={handleStatusChange}
                   />
                 ))}
@@ -365,12 +387,16 @@ function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
           <option value="IN_PROGRESS">In Progress</option>
           <option value="COMPLETED">Completed</option>
         </select>
-        <button className="btn-icon" onClick={() => onEdit(task)} title="Edit">
-          ✏️
-        </button>
-        <button className="btn-icon" onClick={() => onDelete(task.id)} title="Delete">
-          🗑️
-        </button>
+        {onEdit && (
+          <button className="btn-icon" onClick={() => onEdit(task)} title="Edit">
+            ✏️
+          </button>
+        )}
+        {onDelete && (
+          <button className="btn-icon" onClick={() => onDelete(task.id)} title="Delete">
+            🗑️
+          </button>
+        )}
       </div>
     </div>
   );
