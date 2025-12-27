@@ -93,12 +93,19 @@ public class ProjectController {
     @GetMapping
     public ResponseEntity<?> listProjects(@RequestAttribute("tenantId") String tenantId,
                                          @RequestAttribute("role") String role,
+                                         @RequestParam(required = false) String tenantIdFilter,
                                          @RequestParam(defaultValue = "1") int page,
                                          @RequestParam(defaultValue = "20") int limit) {
         Pageable pageable = PageRequest.of(page - 1, Math.min(limit, 100));
-        Page<Project> projects = "SUPER_ADMIN".equals(role)
-                ? projectRepository.findAll(pageable)
-                : projectRepository.findByTenantId(tenantId, pageable);
+        Page<Project> projects;
+        if ("SUPER_ADMIN".equals(role)) {
+            String effectiveTenant = (tenantIdFilter != null && !tenantIdFilter.isBlank()) ? tenantIdFilter : null;
+            projects = (effectiveTenant != null)
+                    ? projectRepository.findByTenantId(effectiveTenant, pageable)
+                    : projectRepository.findAll(pageable);
+        } else {
+            projects = projectRepository.findByTenantId(tenantId, pageable);
+        }
 
         List<Map<String, Object>> projectList = projects.getContent().stream()
                 .map(this::buildProjectResponse)

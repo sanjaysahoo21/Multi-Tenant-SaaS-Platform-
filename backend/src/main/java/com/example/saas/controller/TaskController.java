@@ -260,4 +260,44 @@ public class TaskController {
     public static class UpdateTaskStatusRequest {
         private String status;
     }
+
+    // List tasks across tenants (super admin only)
+    @GetMapping("/tasks")
+    public ResponseEntity<?> listAllTasks(@RequestAttribute("role") String role,
+                                          @RequestParam(required = false) String tenantId,
+                                          @RequestParam(required = false) String projectId,
+                                          @RequestParam(required = false) String status,
+                                          @RequestParam(defaultValue = "1") int page,
+                                          @RequestParam(defaultValue = "50") int limit) {
+        if (!"SUPER_ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, Math.min(limit, 100));
+
+        Page<Task> tasks;
+        if (projectId != null && !projectId.isBlank()) {
+            tasks = taskRepository.findByProjectId(projectId, pageable);
+        } else if (tenantId != null && !tenantId.isBlank()) {
+            tasks = taskRepository.findByTenantId(tenantId, pageable);
+        } else {
+            tasks = taskRepository.findAll(pageable);
+        }
+
+        List<Map<String, Object>> taskList = tasks.getContent().stream()
+                .filter(t -> status == null || t.getStatus().name().equals(status))
+                .map(this::buildTaskResponse)
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("tasks", taskList);
+        response.put("total", tasks.getTotalElements());
+        Map<String, Object> pagination = new HashMap<>();
+        pagination.put("currentPage", page);
+        pagination.put("totalPages", tasks.getTotalPages());
+        pagination.put("limit", limit);
+        response.put("pagination", pagination);
+
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
 }

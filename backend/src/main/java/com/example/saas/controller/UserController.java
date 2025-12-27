@@ -5,6 +5,7 @@ import com.example.saas.repository.UserRepository;
 import com.example.saas.util.ApiResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,47 @@ public class UserController {
     public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    // List users (super admin only, optional tenant filter)
+    @GetMapping
+    public ResponseEntity<?> listUsers(@RequestAttribute("role") String role,
+                                       @RequestParam(required = false) String tenantId,
+                                       @RequestParam(required = false) String search,
+                                       @RequestParam(defaultValue = "1") int page,
+                                       @RequestParam(defaultValue = "50") int limit) {
+        if (!"SUPER_ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
+        }
+
+        List<User> users;
+        if (tenantId != null && !tenantId.isBlank()) {
+            if (search != null && !search.isBlank()) {
+                users = userRepository
+                        .findByTenantIdAndFullNameIgnoreCaseContainingOrTenantIdAndEmailIgnoreCaseContaining(
+                                tenantId, search, tenantId, search, PageRequest.of(page - 1, Math.min(limit, 100)))
+                        .getContent();
+            } else {
+                users = userRepository.findByTenantId(tenantId, PageRequest.of(page - 1, Math.min(limit, 100))).getContent();
+            }
+        } else {
+            // No tenant filter: search across all users
+            List<User> pageContent = userRepository.findAll(PageRequest.of(page - 1, Math.min(limit, 100))).getContent();
+            if (search != null && !search.isBlank()) {
+                users = pageContent.stream()
+                        .filter(u -> u.getFullName().toLowerCase().contains(search.toLowerCase())
+                                || u.getEmail().toLowerCase().contains(search.toLowerCase()))
+                        .toList();
+            } else {
+                users = pageContent;
+            }
+        }
+
+        List<Map<String, Object>> payload = users.stream()
+                .map(this::buildUserResponse)
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(payload));
     }
 
     // Get user profile
