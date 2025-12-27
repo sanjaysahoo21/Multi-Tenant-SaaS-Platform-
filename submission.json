@@ -1,0 +1,551 @@
+{
+  "projectName": "WorkStack - Multi-Tenant SaaS Platform",
+  "submissionDate": "2025-12-27",
+  "version": "1.0.0",
+  "description": "A comprehensive multi-tenant SaaS project management platform with role-based access control, real-time collaboration, and enterprise-grade security.",
+  
+  "applicationAccess": {
+    "frontend": {
+      "url": "http://localhost:3000",
+      "port": 3000
+    },
+    "backend": {
+      "url": "http://localhost:5000",
+      "port": 5000,
+      "baseApiPath": "/api"
+    },
+    "database": {
+      "host": "localhost",
+      "port": 5432,
+      "name": "saasdb",
+      "user": "saasuser",
+      "password": "saaspass123"
+    }
+  },
+
+  "deploymentInstructions": {
+    "prerequisite": "Docker and Docker Compose (v20.10+)",
+    "quickStart": [
+      "1. Clone the repository: git clone https://github.com/sanjaysahoo21/Multi-Tenant-SaaS-Platform-.git",
+      "2. Navigate to project directory: cd Multi-Tenant-SaaS-Platform",
+      "3. Start all services: docker compose up -d --build",
+      "4. Wait for services to initialize (2-3 minutes)",
+      "5. Verify health check: curl http://localhost:5000/api/health",
+      "6. Access frontend: http://localhost:3000",
+      "7. Login with test credentials below"
+    ]
+  },
+
+  "testCredentials": {
+    "superAdmin": {
+      "email": "admin@workstack.com",
+      "password": "Admin@123456",
+      "role": "SUPER_ADMIN",
+      "permissions": "Full system access, manage all tenants",
+      "expectedAccess": [
+        "View all tenants dashboard",
+        "Manage all system users",
+        "View system health metrics",
+        "Access admin panel"
+      ]
+    },
+    "tenantAdmin": {
+      "email": "tenant.admin@acmecorp.com",
+      "password": "TenantAdmin@123",
+      "role": "TENANT_ADMIN",
+      "tenantName": "Acme Corporation",
+      "permissions": "Manage tenant users, projects, and settings",
+      "expectedAccess": [
+        "Invite and manage team members",
+        "Create and manage projects",
+        "View tenant analytics dashboard",
+        "Update tenant settings",
+        "Manage user roles within tenant"
+      ]
+    },
+    "regularUser": {
+      "email": "developer@acmecorp.com",
+      "password": "User@123456",
+      "role": "USER",
+      "tenantName": "Acme Corporation",
+      "permissions": "Create and manage own tasks, view shared projects",
+      "expectedAccess": [
+        "View assigned projects",
+        "Create and manage own tasks",
+        "View team member profiles",
+        "Collaborate on projects",
+        "Cannot manage other users or tenant settings"
+      ]
+    },
+    "teamMember": {
+      "email": "designer@acmecorp.com",
+      "password": "User@123456",
+      "role": "USER",
+      "tenantName": "Acme Corporation",
+      "permissions": "Team member with project access",
+      "expectedAccess": [
+        "View assigned projects",
+        "Update task status",
+        "Add task comments",
+        "View project analytics"
+      ]
+    }
+  },
+
+  "seedData": {
+    "tenants": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "name": "Acme Corporation",
+        "subdomain": "acme-corp",
+        "subscriptionPlan": "PROFESSIONAL",
+        "status": "ACTIVE",
+        "maxUsers": 50,
+        "maxProjects": 20,
+        "createdAt": "2025-12-20T10:30:00Z"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440002",
+        "name": "TechStartup Inc",
+        "subdomain": "techstartup",
+        "subscriptionPlan": "STARTER",
+        "status": "ACTIVE",
+        "maxUsers": 10,
+        "maxProjects": 5,
+        "createdAt": "2025-12-21T14:15:00Z"
+      }
+    ],
+    "users": [
+      {
+        "email": "admin@workstack.com",
+        "password": "Admin@123456",
+        "fullName": "System Administrator",
+        "role": "SUPER_ADMIN",
+        "status": "ACTIVE",
+        "createdAt": "2025-12-20T10:30:00Z"
+      },
+      {
+        "email": "tenant.admin@acmecorp.com",
+        "password": "TenantAdmin@123",
+        "fullName": "John Smith",
+        "role": "TENANT_ADMIN",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "status": "ACTIVE",
+        "createdAt": "2025-12-20T10:30:00Z"
+      },
+      {
+        "email": "developer@acmecorp.com",
+        "password": "User@123456",
+        "fullName": "Jane Developer",
+        "role": "USER",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "status": "ACTIVE",
+        "createdAt": "2025-12-21T09:15:00Z"
+      },
+      {
+        "email": "designer@acmecorp.com",
+        "password": "User@123456",
+        "fullName": "Mike Designer",
+        "role": "USER",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "status": "ACTIVE",
+        "createdAt": "2025-12-21T10:45:00Z"
+      },
+      {
+        "email": "admin@techstartup.com",
+        "password": "TenantAdmin@123",
+        "fullName": "Sarah Founder",
+        "role": "TENANT_ADMIN",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440002",
+        "status": "ACTIVE",
+        "createdAt": "2025-12-21T14:15:00Z"
+      }
+    ],
+    "projects": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440001",
+        "name": "Website Redesign",
+        "description": "Complete redesign of company website with modern design system",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "ownerId": "550e8400-e29b-41d4-a716-446655440011",
+        "status": "IN_PROGRESS",
+        "priority": "HIGH",
+        "dueDate": "2026-03-31",
+        "createdAt": "2025-12-20T10:30:00Z"
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440002",
+        "name": "Mobile App Development",
+        "description": "Native iOS and Android applications",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "ownerId": "550e8400-e29b-41d4-a716-446655440011",
+        "status": "IN_PROGRESS",
+        "priority": "HIGH",
+        "dueDate": "2026-06-30",
+        "createdAt": "2025-12-21T09:15:00Z"
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440003",
+        "name": "API Documentation",
+        "description": "Complete API documentation and swagger integration",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "ownerId": "550e8400-e29b-41d4-a716-446655440011",
+        "status": "TODO",
+        "priority": "MEDIUM",
+        "dueDate": "2026-02-15",
+        "createdAt": "2025-12-22T11:30:00Z"
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440004",
+        "name": "AI Integration",
+        "description": "Integrate AI-powered features for task automation",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440002",
+        "ownerId": "550e8400-e29b-41d4-a716-446655440021",
+        "status": "TODO",
+        "priority": "LOW",
+        "dueDate": "2026-09-30",
+        "createdAt": "2025-12-21T14:15:00Z"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "770e8400-e29b-41d4-a716-446655440001",
+        "title": "Design landing page mockups",
+        "description": "Create high-fidelity mockups for the landing page",
+        "projectId": "660e8400-e29b-41d4-a716-446655440001",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "assignedTo": "550e8400-e29b-41d4-a716-446655440012",
+        "status": "IN_PROGRESS",
+        "priority": "HIGH",
+        "dueDate": "2026-01-15",
+        "createdAt": "2025-12-20T10:30:00Z"
+      },
+      {
+        "id": "770e8400-e29b-41d4-a716-446655440002",
+        "title": "Implement responsive CSS",
+        "description": "Make website responsive for all screen sizes",
+        "projectId": "660e8400-e29b-41d4-a716-446655440001",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "assignedTo": "550e8400-e29b-41d4-a716-446655440012",
+        "status": "TODO",
+        "priority": "HIGH",
+        "dueDate": "2026-02-01",
+        "createdAt": "2025-12-21T09:15:00Z"
+      },
+      {
+        "id": "770e8400-e29b-41d4-a716-446655440003",
+        "title": "Backend API development",
+        "description": "Develop RESTful API endpoints for the website",
+        "projectId": "660e8400-e29b-41d4-a716-446655440001",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "assignedTo": "550e8400-e29b-41d4-a716-446655440011",
+        "status": "IN_PROGRESS",
+        "priority": "HIGH",
+        "dueDate": "2026-01-20",
+        "createdAt": "2025-12-21T10:45:00Z"
+      },
+      {
+        "id": "770e8400-e29b-41d4-a716-446655440004",
+        "title": "iOS app development",
+        "description": "Develop native iOS application",
+        "projectId": "660e8400-e29b-41d4-a716-446655440002",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "assignedTo": "550e8400-e29b-41d4-a716-446655440012",
+        "status": "TODO",
+        "priority": "HIGH",
+        "dueDate": "2026-04-30",
+        "createdAt": "2025-12-21T14:15:00Z"
+      },
+      {
+        "id": "770e8400-e29b-41d4-a716-446655440005",
+        "title": "Android app development",
+        "description": "Develop native Android application",
+        "projectId": "660e8400-e29b-41d4-a716-446655440002",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "assignedTo": "550e8400-e29b-41d4-a716-446655440012",
+        "status": "TODO",
+        "priority": "HIGH",
+        "dueDate": "2026-05-15",
+        "createdAt": "2025-12-22T08:30:00Z"
+      },
+      {
+        "id": "770e8400-e29b-41d4-a716-446655440006",
+        "title": "Write API documentation",
+        "description": "Document all 19 API endpoints with examples",
+        "projectId": "660e8400-e29b-41d4-a716-446655440003",
+        "tenantId": "550e8400-e29b-41d4-a716-446655440001",
+        "assignedTo": "550e8400-e29b-41d4-a716-446655440011",
+        "status": "TODO",
+        "priority": "MEDIUM",
+        "dueDate": "2026-02-10",
+        "createdAt": "2025-12-22T11:30:00Z"
+      }
+    ]
+  },
+
+  "apiEndpoints": {
+    "total": 19,
+    "categories": {
+      "authentication": {
+        "count": 3,
+        "endpoints": [
+          "POST /auth/register",
+          "POST /auth/login",
+          "GET /auth/validate"
+        ]
+      },
+      "tenants": {
+        "count": 4,
+        "endpoints": [
+          "GET /tenants",
+          "GET /tenants/{id}",
+          "PUT /tenants/{id}",
+          "DELETE /tenants/{id}"
+        ]
+      },
+      "users": {
+        "count": 4,
+        "endpoints": [
+          "GET /users",
+          "GET /users/{id}",
+          "POST /users/invite",
+          "PUT /users/{id}"
+        ]
+      },
+      "projects": {
+        "count": 4,
+        "endpoints": [
+          "GET /projects",
+          "POST /projects",
+          "PUT /projects/{id}",
+          "DELETE /projects/{id}"
+        ]
+      },
+      "tasks": {
+        "count": 4,
+        "endpoints": [
+          "GET /tasks",
+          "POST /tasks",
+          "PUT /tasks/{id}",
+          "DELETE /tasks/{id}"
+        ]
+      },
+      "health": {
+        "count": 1,
+        "endpoints": [
+          "GET /health"
+        ]
+      }
+    }
+  },
+
+  "features": [
+    "Multi-tenant architecture with row-level security (RLS)",
+    "Role-based access control (RBAC) with 3 role types: SUPER_ADMIN, TENANT_ADMIN, USER",
+    "JWT-based authentication with 24-hour token expiration",
+    "RESTful API with 19 endpoints for complete CRUD operations",
+    "Real-time project and task management",
+    "Team collaboration features",
+    "Subscription plan management (FREE, STARTER, PROFESSIONAL, ENTERPRISE)",
+    "User invitation and team management",
+    "Advanced filtering and pagination support",
+    "Light/Dark theme with CSS variables and localStorage persistence",
+    "Responsive design for mobile and desktop",
+    "Comprehensive error handling and validation",
+    "PostgreSQL database with automatic migrations",
+    "Docker containerization for easy deployment"
+  ],
+
+  "technicalStack": {
+    "backend": {
+      "framework": "Spring Boot 3.2.0",
+      "language": "Java 17",
+      "security": "Spring Security 6.0",
+      "database": "PostgreSQL 16",
+      "orm": "JPA/Hibernate",
+      "authentication": "JWT (JJWT 0.12.3)",
+      "password_hashing": "BCrypt",
+      "migrations": "Flyway 9.20.0",
+      "build_tool": "Maven 3.8+",
+      "testing": "JUnit 5, Mockito"
+    },
+    "frontend": {
+      "framework": "React 18",
+      "build_tool": "Vite 5.0",
+      "language": "JavaScript (ES6+)",
+      "styling": "CSS3 with CSS Variables",
+      "state_management": "React Context API",
+      "http_client": "Axios",
+      "icons": "Lucide React",
+      "testing": "Vitest, React Testing Library"
+    },
+    "deployment": {
+      "containerization": "Docker & Docker Compose",
+      "webserver": "Nginx (frontend)",
+      "database_server": "PostgreSQL 16",
+      "orchestration": "Docker Compose (local), Kubernetes (production)",
+      "cloud_options": "AWS ECS, Azure AKS, Digital Ocean"
+    }
+  },
+
+  "documentation": {
+    "readme": "README.md - Project overview, setup instructions, features",
+    "research": "docs/research.md - Multi-tenancy research, technology stack justification, security analysis (2400+ words)",
+    "prd": "docs/PRD.md - Product requirements with personas, functional/non-functional requirements, use cases",
+    "architecture": "docs/architecture.md - System architecture diagrams, API endpoints, data flow, security layers",
+    "technicalSpec": "docs/technical-spec.md - Development setup, project structure, Docker configuration",
+    "api": "docs/API.md - Complete API documentation for all 19 endpoints with request/response examples",
+    "docker": "docs/DOCKER.md - Docker and Docker Compose setup instructions"
+  },
+
+  "databaseSchema": {
+    "tables": [
+      {
+        "name": "tenants",
+        "columns": [
+          "id UUID PRIMARY KEY",
+          "name VARCHAR(255) UNIQUE NOT NULL",
+          "subdomain VARCHAR(255) UNIQUE NOT NULL",
+          "subscription_plan VARCHAR(50) DEFAULT 'FREE'",
+          "status VARCHAR(50) DEFAULT 'ACTIVE'",
+          "max_users INTEGER DEFAULT 5",
+          "max_projects INTEGER DEFAULT 3",
+          "created_at TIMESTAMP DEFAULT NOW()",
+          "updated_at TIMESTAMP DEFAULT NOW()"
+        ]
+      },
+      {
+        "name": "users",
+        "columns": [
+          "id UUID PRIMARY KEY",
+          "email VARCHAR(255) NOT NULL",
+          "password_hash VARCHAR(255) NOT NULL",
+          "full_name VARCHAR(255)",
+          "role VARCHAR(50) DEFAULT 'USER'",
+          "tenant_id UUID NOT NULL FOREIGN KEY",
+          "status VARCHAR(50) DEFAULT 'ACTIVE'",
+          "created_at TIMESTAMP DEFAULT NOW()",
+          "updated_at TIMESTAMP DEFAULT NOW()",
+          "UNIQUE(tenant_id, email)"
+        ]
+      },
+      {
+        "name": "projects",
+        "columns": [
+          "id UUID PRIMARY KEY",
+          "name VARCHAR(255) NOT NULL",
+          "description TEXT",
+          "tenant_id UUID NOT NULL FOREIGN KEY",
+          "owner_id UUID NOT NULL FOREIGN KEY",
+          "status VARCHAR(50) DEFAULT 'ACTIVE'",
+          "priority VARCHAR(50) DEFAULT 'MEDIUM'",
+          "due_date DATE",
+          "created_at TIMESTAMP DEFAULT NOW()",
+          "updated_at TIMESTAMP DEFAULT NOW()",
+          "UNIQUE(tenant_id, name)"
+        ]
+      },
+      {
+        "name": "tasks",
+        "columns": [
+          "id UUID PRIMARY KEY",
+          "title VARCHAR(255) NOT NULL",
+          "description TEXT",
+          "project_id UUID NOT NULL FOREIGN KEY",
+          "tenant_id UUID NOT NULL FOREIGN KEY",
+          "assigned_to UUID FOREIGN KEY",
+          "status VARCHAR(50) DEFAULT 'TODO'",
+          "priority VARCHAR(50) DEFAULT 'MEDIUM'",
+          "due_date DATE",
+          "created_at TIMESTAMP DEFAULT NOW()",
+          "updated_at TIMESTAMP DEFAULT NOW()"
+        ]
+      }
+    ]
+  },
+
+  "verificationChecklist": {
+    "deployment": [
+      {
+        "item": "Docker Compose starts all services",
+        "status": "To verify",
+        "command": "docker compose up -d"
+      },
+      {
+        "item": "Services run on correct ports",
+        "status": "To verify",
+        "ports": "database: 5432, backend: 5000, frontend: 3000"
+      },
+      {
+        "item": "Health check endpoint responds",
+        "status": "To verify",
+        "command": "curl http://localhost:5000/api/health"
+      },
+      {
+        "item": "Frontend loads on port 3000",
+        "status": "To verify",
+        "url": "http://localhost:3000"
+      }
+    ],
+    "functionality": [
+      {
+        "item": "User registration works",
+        "testWith": "Email: newuser@test.com, Password: Pass@123"
+      },
+      {
+        "item": "Login with test credentials",
+        "testWith": "Admin, Tenant Admin, Regular User"
+      },
+      {
+        "item": "Create project",
+        "testWith": "As TENANT_ADMIN"
+      },
+      {
+        "item": "Create task in project",
+        "testWith": "As TENANT_ADMIN or USER"
+      },
+      {
+        "item": "Multi-tenant data isolation",
+        "testWith": "Login as two different tenants, verify no cross-tenant access"
+      }
+    ],
+    "security": [
+      {
+        "item": "JWT authentication enforced",
+        "testWith": "Try accessing /users without token - should get 401"
+      },
+      {
+        "item": "RBAC enforced",
+        "testWith": "As USER, try to invite new user - should get 403"
+      },
+      {
+        "item": "Password hashing",
+        "testWith": "Check database - passwords should not be plain text"
+      }
+    ]
+  },
+
+  "gitRepository": {
+    "url": "https://github.com/sanjaysahoo21/Multi-Tenant-SaaS-Platform-",
+    "minimumCommits": 30,
+    "commitHistory": [
+      "Initial project setup with Spring Boot and React",
+      "Implement multi-tenant database schema",
+      "Add JWT authentication",
+      "Implement RBAC system",
+      "Create REST API endpoints",
+      "Frontend pages development",
+      "Docker containerization",
+      "Documentation generation",
+      "Theme implementation (light/dark mode)",
+      "Bug fixes and optimizations"
+    ]
+  },
+
+  "evaluation": {
+    "automatedTests": "Run test suite with: mvn test && npm test",
+    "demoVideo": "5-12 minute YouTube video demonstrating all features",
+    "documentation": "Must include all required documentation files",
+    "submission": "All files committed to GitHub repo"
+  }
+}
