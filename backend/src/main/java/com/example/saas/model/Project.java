@@ -3,6 +3,10 @@ package com.example.saas.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Project entity with tenant isolation
+ * Tracks project details, status, and associated tasks
+ */
 @Entity
 @Table(name = "projects", indexes = {
     @Index(name = "idx_tenant_id", columnList = "tenant_id")
