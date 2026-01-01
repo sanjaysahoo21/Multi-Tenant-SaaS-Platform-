@@ -42,7 +42,7 @@ function Navbar() {
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           <span className="user-info">
-            {user?.fullName} ({user?.role})
+            {user?.fullName}
           </span>
           <button onClick={handleLogout} className="btn btn-secondary">
             Logout
