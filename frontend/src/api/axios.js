@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  // Prefer env override, otherwise hit the deployed backend directly.
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://multi-tenant-saas-platform-ik5b.onrender.com',
   headers: {
     'Content-Type': 'application/json'
   }
