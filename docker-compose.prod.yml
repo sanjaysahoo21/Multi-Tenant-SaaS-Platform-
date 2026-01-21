@@ -1,0 +1,72 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: workstack-database
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-saasdb}
+      POSTGRES_USER: ${POSTGRES_USER:-saasuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-saaspass123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-saasuser} -d ${POSTGRES_DB:-saasdb}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: workstack-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-saasdb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-saasuser}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-saaspass123}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_LOCATIONS: classpath:db/migration
+      SPRING_FLYWAY_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-saasdb}
+      SPRING_FLYWAY_USER: ${POSTGRES_USER:-saasuser}
+      SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:-saaspass123}
+      JWT_SECRET: ${JWT_SECRET:-your-very-secure-secret-key-minimum-32-characters-long-for-HS256}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400}
+      SERVER_PORT: 5000
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "5000:5000"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - saas-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5000/api}
+    container_name: workstack-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - saas-network
+
+volumes:
+  postgres_data:
+
+
+networks:
+  saas-network:
+    driver: bridge
