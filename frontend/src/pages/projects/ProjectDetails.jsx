@@ -109,7 +109,7 @@ function ProjectDetails() {
       }
       const taskData = {
         ...formData,
-        assignedToId: formData.assignedToId || null,
+        assignedTo: formData.assignedToId || null,
         dueDate: formData.dueDate || null
       };
 
@@ -204,9 +204,9 @@ function ProjectDetails() {
               <h3>To Do</h3>
               <div className="task-list">
                 {tasks.filter(t => t.status === 'TODO').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
+                  <TaskCard
+                    key={task.id}
+                    task={task}
                     onEdit={isAdmin ? handleOpenModal : null}
                     onDelete={isAdmin ? handleDeleteTask : null}
                     onStatusChange={handleStatusChange}
@@ -219,9 +219,9 @@ function ProjectDetails() {
               <h3>In Progress</h3>
               <div className="task-list">
                 {tasks.filter(t => t.status === 'IN_PROGRESS').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
+                  <TaskCard
+                    key={task.id}
+                    task={task}
                     onEdit={isAdmin ? handleOpenModal : null}
                     onDelete={isAdmin ? handleDeleteTask : null}
                     onStatusChange={handleStatusChange}
@@ -234,9 +234,9 @@ function ProjectDetails() {
               <h3>Completed</h3>
               <div className="task-list">
                 {tasks.filter(t => t.status === 'COMPLETED').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
+                  <TaskCard
+                    key={task.id}
+                    task={task}
                     onEdit={isAdmin ? handleOpenModal : null}
                     onDelete={isAdmin ? handleDeleteTask : null}
                     onStatusChange={handleStatusChange}
@@ -252,7 +252,7 @@ function ProjectDetails() {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h2>{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
               {error && <div className="error-message">{error}</div>}
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="title">Title *</label>
@@ -363,21 +363,21 @@ function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
           {task.priority || 'UNKNOWN'}
         </span>
       </div>
-      
+
       {task.description && <p className="task-description">{task.description}</p>}
-      
+
       {task.assignedTo && (
         <div className="task-assignee">
           👤 {task.assignedTo.fullName}
         </div>
       )}
-      
+
       {task.dueDate && (
         <div className="task-due-date">
           📅 {new Date(task.dueDate).toLocaleDateString()}
         </div>
       )}
-      
+
       <div className="task-actions">
         <select
           value={task.status}

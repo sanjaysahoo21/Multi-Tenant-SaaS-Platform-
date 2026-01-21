@@ -9,8 +9,6 @@ import com.example.saas.repository.TaskRepository;
 import com.example.saas.repository.TenantRepository;
 import com.example.saas.repository.UserRepository;
 import com.example.saas.util.ApiResponse;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +30,7 @@ public class TaskController {
     private final TenantRepository tenantRepository;
 
     public TaskController(TaskRepository taskRepository, ProjectRepository projectRepository,
-                        UserRepository userRepository, TenantRepository tenantRepository) {
+            UserRepository userRepository, TenantRepository tenantRepository) {
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
@@ -42,9 +40,9 @@ public class TaskController {
     // Create task
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<?> createTask(@PathVariable String projectId,
-                                       @RequestBody CreateTaskRequest request,
-                                       @RequestAttribute("tenantId") String tenantId,
-                                       @RequestAttribute("role") String role) {
+            @RequestBody CreateTaskRequest request,
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -89,10 +87,10 @@ public class TaskController {
     // List project tasks
     @GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<?> listTasks(@PathVariable String projectId,
-                                      @RequestAttribute("tenantId") String tenantId,
-                                      @RequestAttribute("role") String role,
-                                      @RequestParam(defaultValue = "1") int page,
-                                      @RequestParam(defaultValue = "50") int limit) {
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "50") int limit) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -105,8 +103,8 @@ public class TaskController {
 
         Pageable pageable = PageRequest.of(page - 1, Math.min(limit, 100));
         Page<Task> tasks = "SUPER_ADMIN".equals(role)
-            ? taskRepository.findByProjectId(projectId, pageable)
-            : taskRepository.findByProjectIdAndTenantId(projectId, tenantId, pageable);
+                ? taskRepository.findByProjectId(projectId, pageable)
+                : taskRepository.findByProjectIdAndTenantId(projectId, tenantId, pageable);
 
         List<Map<String, Object>> taskList = tasks.getContent().stream()
                 .map(this::buildTaskResponse)
@@ -127,9 +125,9 @@ public class TaskController {
     // Update task
     @PutMapping("/tasks/{taskId}")
     public ResponseEntity<?> updateTask(@PathVariable String taskId,
-                                       @RequestBody UpdateTaskRequest request,
-                                       @RequestAttribute("tenantId") String tenantId,
-                                       @RequestAttribute("role") String role) {
+            @RequestBody UpdateTaskRequest request,
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
         if (taskOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -145,11 +143,16 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
-        if (request.title != null) task.setTitle(request.title);
-        if (request.description != null) task.setDescription(request.description);
-        if (request.status != null) task.setStatus(Task.TaskStatus.valueOf(request.status));
-        if (request.priority != null) task.setPriority(Task.TaskPriority.valueOf(request.priority));
-        if (request.dueDate != null) task.setDueDate(LocalDate.parse(request.dueDate));
+        if (request.title != null)
+            task.setTitle(request.title);
+        if (request.description != null)
+            task.setDescription(request.description);
+        if (request.status != null)
+            task.setStatus(Task.TaskStatus.valueOf(request.status));
+        if (request.priority != null)
+            task.setPriority(Task.TaskPriority.valueOf(request.priority));
+        if (request.dueDate != null)
+            task.setDueDate(LocalDate.parse(request.dueDate));
 
         if (request.assignedTo != null) {
             Optional<User> userOpt = userRepository.findById(request.assignedTo);
@@ -168,9 +171,9 @@ public class TaskController {
     // Update task status only
     @PatchMapping("/tasks/{taskId}/status")
     public ResponseEntity<?> updateTaskStatus(@PathVariable String taskId,
-                                             @RequestBody UpdateTaskStatusRequest request,
-                                             @RequestAttribute("tenantId") String tenantId,
-                                             @RequestAttribute("role") String role) {
+            @RequestBody UpdateTaskStatusRequest request,
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
         if (taskOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -189,8 +192,8 @@ public class TaskController {
     // Delete task
     @DeleteMapping("/tasks/{taskId}")
     public ResponseEntity<?> deleteTask(@PathVariable String taskId,
-                                       @RequestAttribute("tenantId") String tenantId,
-                                       @RequestAttribute("role") String role) {
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
         if (taskOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -218,7 +221,7 @@ public class TaskController {
         data.put("description", task.getDescription());
         data.put("status", task.getStatus());
         data.put("priority", task.getPriority());
-        data.put("dueDate", task.getDueDate());
+        data.put("dueDate", task.getDueDate() != null ? task.getDueDate().toString() : null);
 
         if (task.getAssignedTo() != null) {
             Map<String, Object> assignee = new HashMap<>();
@@ -234,18 +237,65 @@ public class TaskController {
         return data;
     }
 
-    @Data
-    @NoArgsConstructor
     public static class CreateTaskRequest {
         private String title;
         private String description;
         private String assignedTo;
         private String priority;
         private String dueDate;
+
+        public CreateTaskRequest() {
+        }
+
+        public CreateTaskRequest(String title, String description, String assignedTo, String priority, String dueDate) {
+            this.title = title;
+            this.description = description;
+            this.assignedTo = assignedTo;
+            this.priority = priority;
+            this.dueDate = dueDate;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getAssignedTo() {
+            return assignedTo;
+        }
+
+        public void setAssignedTo(String assignedTo) {
+            this.assignedTo = assignedTo;
+        }
+
+        public String getPriority() {
+            return priority;
+        }
+
+        public void setPriority(String priority) {
+            this.priority = priority;
+        }
+
+        public String getDueDate() {
+            return dueDate;
+        }
+
+        public void setDueDate(String dueDate) {
+            this.dueDate = dueDate;
+        }
     }
 
-    @Data
-    @NoArgsConstructor
     public static class UpdateTaskRequest {
         private String title;
         private String description;
@@ -253,22 +303,96 @@ public class TaskController {
         private String priority;
         private String assignedTo;
         private String dueDate;
+
+        public UpdateTaskRequest() {
+        }
+
+        public UpdateTaskRequest(String title, String description, String status, String priority, String assignedTo,
+                String dueDate) {
+            this.title = title;
+            this.description = description;
+            this.status = status;
+            this.priority = priority;
+            this.assignedTo = assignedTo;
+            this.dueDate = dueDate;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getPriority() {
+            return priority;
+        }
+
+        public void setPriority(String priority) {
+            this.priority = priority;
+        }
+
+        public String getAssignedTo() {
+            return assignedTo;
+        }
+
+        public void setAssignedTo(String assignedTo) {
+            this.assignedTo = assignedTo;
+        }
+
+        public String getDueDate() {
+            return dueDate;
+        }
+
+        public void setDueDate(String dueDate) {
+            this.dueDate = dueDate;
+        }
     }
 
-    @Data
-    @NoArgsConstructor
     public static class UpdateTaskStatusRequest {
         private String status;
+
+        public UpdateTaskStatusRequest() {
+        }
+
+        public UpdateTaskStatusRequest(String status) {
+            this.status = status;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
     }
 
     // List tasks across tenants (super admin only)
     @GetMapping("/tasks")
     public ResponseEntity<?> listAllTasks(@RequestAttribute("role") String role,
-                                          @RequestParam(required = false) String tenantId,
-                                          @RequestParam(required = false) String projectId,
-                                          @RequestParam(required = false) String status,
-                                          @RequestParam(defaultValue = "1") int page,
-                                          @RequestParam(defaultValue = "50") int limit) {
+            @RequestParam(required = false) String tenantId,
+            @RequestParam(required = false) String projectId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "50") int limit) {
         if (!"SUPER_ADMIN".equals(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }

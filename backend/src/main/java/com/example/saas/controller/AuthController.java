@@ -31,8 +31,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     public AuthController(TenantRepository tenantRepository, UserRepository userRepository,
-                         AuditLogRepository auditLogRepository, JwtUtil jwtUtil,
-                         PasswordEncoder passwordEncoder) {
+            AuditLogRepository auditLogRepository, JwtUtil jwtUtil,
+            PasswordEncoder passwordEncoder) {
         this.tenantRepository = tenantRepository;
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
@@ -41,14 +41,14 @@ public class AuthController {
     }
 
     // Register Tenant
-    @PostMapping({"/register-tenant", "/register"})
+    @PostMapping({ "/register-tenant", "/register" })
     public ResponseEntity<?> registerTenant(@RequestBody RegisterTenantRequest request) {
         // Validate input
         if (request.tenantName == null || request.tenantName.isBlank() ||
-            request.subdomain == null || request.subdomain.isBlank() ||
-            request.adminEmail == null || request.adminEmail.isBlank() ||
-            request.adminPassword == null || request.adminPassword.length() < 8 ||
-            request.adminFullName == null || request.adminFullName.isBlank()) {
+                request.subdomain == null || request.subdomain.isBlank() ||
+                request.adminEmail == null || request.adminEmail.isBlank() ||
+                request.adminPassword == null || request.adminPassword.length() < 8 ||
+                request.adminFullName == null || request.adminFullName.isBlank()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Invalid input"));
         }
 
@@ -106,7 +106,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         if (request.email == null || request.email.isBlank() ||
-            request.password == null || request.password.isBlank()) {
+                request.password == null || request.password.isBlank()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Invalid input"));
         }
 
@@ -119,11 +119,13 @@ public class AuthController {
                 // Allow login without subdomain; still enforce tenant status when present
                 Optional<User> userOpt = userRepository.findByEmail(request.email);
                 if (userOpt.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid credentials"));
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body(ApiResponse.error("Invalid credentials"));
                 }
                 User user = userOpt.get();
                 if (!passwordEncoder.matches(request.password, user.getPasswordHash())) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid credentials"));
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body(ApiResponse.error("Invalid credentials"));
                 }
                 if (!user.getIsActive()) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Account is inactive"));
@@ -132,7 +134,8 @@ public class AuthController {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Tenant is not active"));
                 }
 
-                String token = jwtUtil.generateToken(user.getId(), user.getTenant() != null ? user.getTenant().getId() : null, user.getRole().toString());
+                String token = jwtUtil.generateToken(user.getId(),
+                        user.getTenant() != null ? user.getTenant().getId() : null, user.getRole().toString());
                 return ResponseEntity.ok(buildLoginResponse(user, token));
             }
 
@@ -235,23 +238,102 @@ public class AuthController {
         return ApiResponse.ok(response);
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class RegisterTenantRequest {
         private String tenantName;
         private String subdomain;
         private String adminEmail;
         private String adminPassword;
         private String adminFullName;
+
+        public RegisterTenantRequest() {
+        }
+
+        public RegisterTenantRequest(String tenantName, String subdomain, String adminEmail, String adminPassword,
+                String adminFullName) {
+            this.tenantName = tenantName;
+            this.subdomain = subdomain;
+            this.adminEmail = adminEmail;
+            this.adminPassword = adminPassword;
+            this.adminFullName = adminFullName;
+        }
+
+        public String getTenantName() {
+            return tenantName;
+        }
+
+        public void setTenantName(String tenantName) {
+            this.tenantName = tenantName;
+        }
+
+        public String getSubdomain() {
+            return subdomain;
+        }
+
+        public void setSubdomain(String subdomain) {
+            this.subdomain = subdomain;
+        }
+
+        public String getAdminEmail() {
+            return adminEmail;
+        }
+
+        public void setAdminEmail(String adminEmail) {
+            this.adminEmail = adminEmail;
+        }
+
+        public String getAdminPassword() {
+            return adminPassword;
+        }
+
+        public void setAdminPassword(String adminPassword) {
+            this.adminPassword = adminPassword;
+        }
+
+        public String getAdminFullName() {
+            return adminFullName;
+        }
+
+        public void setAdminFullName(String adminFullName) {
+            this.adminFullName = adminFullName;
+        }
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class LoginRequest {
         private String email;
         private String password;
         private String tenantSubdomain;
+
+        public LoginRequest() {
+        }
+
+        public LoginRequest(String email, String password, String tenantSubdomain) {
+            this.email = email;
+            this.password = password;
+            this.tenantSubdomain = tenantSubdomain;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getTenantSubdomain() {
+            return tenantSubdomain;
+        }
+
+        public void setTenantSubdomain(String tenantSubdomain) {
+            this.tenantSubdomain = tenantSubdomain;
+        }
     }
 }

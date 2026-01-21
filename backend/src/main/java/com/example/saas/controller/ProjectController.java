@@ -9,8 +9,6 @@ import com.example.saas.repository.TaskRepository;
 import com.example.saas.repository.TenantRepository;
 import com.example.saas.repository.UserRepository;
 import com.example.saas.util.ApiResponse;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +29,7 @@ public class ProjectController {
     private final TaskRepository taskRepository;
 
     public ProjectController(ProjectRepository projectRepository, TenantRepository tenantRepository,
-                           UserRepository userRepository, TaskRepository taskRepository) {
+            UserRepository userRepository, TaskRepository taskRepository) {
         this.projectRepository = projectRepository;
         this.tenantRepository = tenantRepository;
         this.userRepository = userRepository;
@@ -40,17 +38,18 @@ public class ProjectController {
 
     /**
      * Create a new project
-     * @param request Project creation request containing name, description, owner
+     * 
+     * @param request  Project creation request containing name, description, owner
      * @param tenantId Tenant ID from JWT token
-     * @param userId User ID from JWT token
-     * @param role User role from JWT token
+     * @param userId   User ID from JWT token
+     * @param role     User role from JWT token
      * @return Created project details or error response
      */
     @PostMapping
     public ResponseEntity<?> createProject(@RequestBody CreateProjectRequest request,
-                                          @RequestAttribute("tenantId") String tenantId,
-                                          @RequestAttribute("userId") String userId,
-                                          @RequestAttribute("role") String role) {
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("userId") String userId,
+            @RequestAttribute("role") String role) {
         String targetTenantId = tenantId;
         if ("SUPER_ADMIN".equals(role) && request.tenantId != null && !request.tenantId.isBlank()) {
             targetTenantId = request.tenantId;
@@ -86,16 +85,17 @@ public class ProjectController {
         project.setCreatedBy(userOpt.orElse(null));
 
         Project saved = projectRepository.save(project);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok("Project created", buildProjectResponse(saved)));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Project created", buildProjectResponse(saved)));
     }
 
     // List projects
     @GetMapping
     public ResponseEntity<?> listProjects(@RequestAttribute("tenantId") String tenantId,
-                                         @RequestAttribute("role") String role,
-                                         @RequestParam(required = false) String tenantIdFilter,
-                                         @RequestParam(defaultValue = "1") int page,
-                                         @RequestParam(defaultValue = "20") int limit) {
+            @RequestAttribute("role") String role,
+            @RequestParam(required = false) String tenantIdFilter,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int limit) {
         Pageable pageable = PageRequest.of(page - 1, Math.min(limit, 100));
         Page<Project> projects;
         if ("SUPER_ADMIN".equals(role)) {
@@ -117,8 +117,8 @@ public class ProjectController {
     // Get project
     @GetMapping("/{projectId}")
     public ResponseEntity<?> getProject(@PathVariable String projectId,
-                                       @RequestAttribute("tenantId") String tenantId,
-                                       @RequestAttribute("role") String role) {
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -135,9 +135,9 @@ public class ProjectController {
     // Update project
     @PutMapping("/{projectId}")
     public ResponseEntity<?> updateProject(@PathVariable String projectId,
-                                          @RequestBody UpdateProjectRequest request,
-                                          @RequestAttribute("tenantId") String tenantId,
-                                          @RequestAttribute("role") String role) {
+            @RequestBody UpdateProjectRequest request,
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -150,9 +150,12 @@ public class ProjectController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Unauthorized"));
         }
 
-        if (request.name != null) project.setName(request.name);
-        if (request.description != null) project.setDescription(request.description);
-        if (request.status != null) project.setStatus(Project.ProjectStatus.valueOf(request.status));
+        if (request.name != null)
+            project.setName(request.name);
+        if (request.description != null)
+            project.setDescription(request.description);
+        if (request.status != null)
+            project.setStatus(Project.ProjectStatus.valueOf(request.status));
 
         Project updated = projectRepository.save(project);
         return ResponseEntity.ok(ApiResponse.ok("Project updated", buildProjectResponse(updated)));
@@ -161,8 +164,8 @@ public class ProjectController {
     // Delete project
     @DeleteMapping("/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable String projectId,
-                                          @RequestAttribute("tenantId") String tenantId,
-                                          @RequestAttribute("role") String role) {
+            @RequestAttribute("tenantId") String tenantId,
+            @RequestAttribute("role") String role) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -200,19 +203,81 @@ public class ProjectController {
         return data;
     }
 
-    @Data
-    @NoArgsConstructor
     public static class CreateProjectRequest {
         private String name;
         private String description;
-        private String tenantId; // used only by super admin when creating on behalf of a tenant
+        private String tenantId;
+
+        public CreateProjectRequest() {
+        }
+
+        public CreateProjectRequest(String name, String description, String tenantId) {
+            this.name = name;
+            this.description = description;
+            this.tenantId = tenantId;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getTenantId() {
+            return tenantId;
+        }
+
+        public void setTenantId(String tenantId) {
+            this.tenantId = tenantId;
+        }
     }
 
-    @Data
-    @NoArgsConstructor
     public static class UpdateProjectRequest {
         private String name;
         private String description;
         private String status;
+
+        public UpdateProjectRequest() {
+        }
+
+        public UpdateProjectRequest(String name, String description, String status) {
+            this.name = name;
+            this.description = description;
+            this.status = status;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
     }
 }
