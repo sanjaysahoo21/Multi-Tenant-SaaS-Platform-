@@ -12,13 +12,13 @@ services:
       - key: FRONTEND_URL
         value: https://workstack-multi-tenant-saas-platform.vercel.app/
       - key: JWT_SECRET
-        value: your_strong_jwt_secret_at_least_32_characters_long
+        value: f8a9c2d4e7b1a6f3c9d0e5b7a2c4f8e1
       - key: JWT_EXPIRES_IN
         value: 86400000
       
-      # Database Connection (Supabase)
+      # Database Connection (Supabase Transaction Mode - Port 6543)
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+        value: jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
       - key: SPRING_DATASOURCE_USERNAME
         value: postgres.qozyrscrjtqephleeefi
       - key: SPRING_DATASOURCE_PASSWORD
@@ -26,11 +26,11 @@ services:
       - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
         value: org.postgresql.Driver
         
-      # Flyway Migration Configuration
+      # Flyway Migration Configuration (Supabase Session Mode - Port 5432)
       - key: SPRING_FLYWAY_URL
-        value: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require
+        value: jdbc:postgresql://db.qozyrscrjtqephleeefi.supabase.co:5432/postgres?sslmode=require
       - key: SPRING_FLYWAY_USER
-        value: postgres.qozyrscrjtqephleeefi
+        value: postgres
       - key: SPRING_FLYWAY_PASSWORD
         value: sanjuvinnu2122
       - key: SPRING_FLYWAY_LOCATIONS
