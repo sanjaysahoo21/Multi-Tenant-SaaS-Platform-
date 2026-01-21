@@ -1,0 +1,37 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: workstack-backend
+    env: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: FRONTEND_URL
+        value: https://workstack-multi-tenant-saas-platform.vercel.app/
+      - key: JWT_SECRET
+        value: your_strong_jwt_secret_at_least_32_characters_long
+      - key: JWT_EXPIRES_IN
+        value: 86400000
+      
+      # Database Connection (Supabase)
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+      - key: SPRING_DATASOURCE_USERNAME
+        value: postgres.qozyrscrjtqephleeefi
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: sanjuvinnu2122
+      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        value: org.postgresql.Driver
+        
+      # Flyway Migration Configuration
+      - key: SPRING_FLYWAY_URL
+        value: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require
+      - key: SPRING_FLYWAY_USER
+        value: postgres.qozyrscrjtqephleeefi
+      - key: SPRING_FLYWAY_PASSWORD
+        value: sanjuvinnu2122
+      - key: SPRING_FLYWAY_LOCATIONS
+        value: classpath:db/migration
