@@ -17,8 +17,9 @@ services:
         value: 86400000
       
       # Database Connection (Supabase Transaction Mode - Port 6543)
+      # Using stable project-ref hostname instead of aws-pooler alias
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+        value: jdbc:postgresql://db.qozyrscrjtqephleeefi.supabase.co:6543/postgres?sslmode=require&pgbouncer=true
       - key: SPRING_DATASOURCE_USERNAME
         value: postgres.qozyrscrjtqephleeefi
       - key: SPRING_DATASOURCE_PASSWORD
