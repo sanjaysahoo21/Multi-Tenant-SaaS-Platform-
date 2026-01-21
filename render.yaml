@@ -22,13 +22,25 @@ services:
       - key: JWT_EXPIRES_IN
         value: 86400000
       
-      # Use the Render Internal Database
-      # Spring Boot will automatically use SPRING_DATASOURCE_URL if provided
-      - key: SPRING_DATASOURCE_URL
+      # Map Render DB Properties to individual env vars
+      # so Spring Boot can construct the valid JDBC URL itself
+      - key: DB_HOST
         fromDatabase:
           name: workstack-db
-          property: connectionString
-      - key: SPRING_FLYWAY_URL
+          property: host
+      - key: DB_PORT
         fromDatabase:
           name: workstack-db
-          property: connectionString
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: workstack-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: workstack-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: workstack-db
+          property: password
