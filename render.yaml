@@ -1,3 +1,9 @@
+databases:
+  - name: workstack-db
+    databaseName: saasdb
+    user: saasuser
+    plan: free
+
 services:
   # Backend Web Service
   - type: web
@@ -16,25 +22,13 @@ services:
       - key: JWT_EXPIRES_IN
         value: 86400000
       
-      # Database Connection (Supabase Transaction Mode - Port 6543)
-      # Reverted to aws-0-ap-south-1 alias which definitely resolves
-      # The Dockerfile IPv4 fix will ensure this connects properly
+      # Use the Render Internal Database
+      # Spring Boot will automatically use SPRING_DATASOURCE_URL if provided
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
-      - key: SPRING_DATASOURCE_USERNAME
-        value: postgres.qozyrscrjtqephleeefi
-      - key: SPRING_DATASOURCE_PASSWORD
-        value: sanjuvinnu2122
-      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
-        value: org.postgresql.Driver
-        
-      # Flyway Migration Configuration (Supabase Session Mode - Port 5432)
-      # Using the same resolving hostname, but on port 5432 for session mode
+        fromDatabase:
+          name: workstack-db
+          property: connectionString
       - key: SPRING_FLYWAY_URL
-        value: jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require
-      - key: SPRING_FLYWAY_USER
-        value: postgres.qozyrscrjtqephleeefi
-      - key: SPRING_FLYWAY_PASSWORD
-        value: sanjuvinnu2122
-      - key: SPRING_FLYWAY_LOCATIONS
-        value: classpath:db/migration
+        fromDatabase:
+          name: workstack-db
+          property: connectionString
