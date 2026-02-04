@@ -2,894 +2,224 @@
 
 ## Overview
 
-The WorkStack API provides a comprehensive RESTful interface for multi-tenant SaaS project management and task tracking. All endpoints require JWT authentication (except login/register) and enforce role-based access control (RBAC).
+The WorkStack API provides a comprehensive RESTful interface for multi-tenant SaaS project management. All endpoints (except Auth/Health) require JWT authentication.
 
 **Base URL:** `http://localhost:5000/api`
 
-**Authentication:** Include JWT token in Authorization header:
-```
-Authorization: Bearer {token}
-```
+**Authentication Scheme:** `Bearer <token>`
 
 ---
 
-## Authentication & Authorization
+## 1. Authentication & System
 
-### 1. Register New Tenant
+### 1.1 Register Tenant
+**POST** `/auth/register`
+Create a new tenant workspace and admin account.
 
-**Endpoint:** `POST /auth/register`
-
-**Description:** Create a new tenant account with admin user
-
-**Request Body:**
-```json
-{
-  "tenantName": "Acme Corporation",
-  "email": "admin@acme.com",
-  "password": "SecurePassword123!",
-  "fullName": "John Doe"
-}
-```
-
-**Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "Tenant created successfully",
-  "data": {
-    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-    "userId": "660e8400-e29b-41d4-a716-446655440000",
-    "email": "admin@acme.com",
-    "token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBhY21lLmNvbSIsImlhdCI6MTcwMzY3MzI4NCwiZXhwIjoxNzAzNzU5Njg0fQ...",
-    "expiresIn": 86400,
-    "role": "TENANT_ADMIN"
-  }
-}
-```
-
-**Error Responses:**
-```json
-// 400 Bad Request
-{
-  "success": false,
-  "message": "Tenant name is required"
-}
-
-// 409 Conflict
-{
-  "success": false,
-  "message": "Email already exists"
-}
-```
-
-**cURL Example:**
-```bash
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tenantName": "Acme Corp",
-    "email": "admin@acme.com",
-    "password": "SecurePass123!",
-    "fullName": "John Doe"
-  }'
-```
-
----
-
-### 2. Login
-
-**Endpoint:** `POST /auth/login`
-
-**Description:** Authenticate user and receive JWT token
-
-**Request Body:**
-```json
-{
-  "email": "user@company.com",
-  "password": "UserPassword123!"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "userId": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "user@company.com",
-    "fullName": "Jane Smith",
-    "tenantId": "660e8400-e29b-41d4-a716-446655440000",
-    "tenantName": "Acme Corporation",
-    "token": "eyJhbGciOiJIUzUxMiJ9...",
-    "expiresIn": 86400,
-    "role": "USER"
-  }
-}
-```
-
-**Error Responses:**
-```json
-// 401 Unauthorized
-{
-  "success": false,
-  "message": "Invalid credentials"
-}
-
-// 404 Not Found
-{
-  "success": false,
-  "message": "User not found"
-}
-```
-
-**cURL Example:**
-```bash
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@company.com",
-    "password": "UserPassword123!"
-  }'
-```
-
----
-
-### 3. Validate Token
-
-**Endpoint:** `GET /auth/validate`
-
-**Description:** Verify JWT token validity
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Token is valid",
-  "data": {
-    "userId": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "user@company.com",
-    "role": "USER",
-    "tenantId": "660e8400-e29b-41d4-a716-446655440000",
-    "expiresAt": 1703759684
-  }
-}
-```
-
-**Error Response (401 Unauthorized):**
-```json
-{
-  "success": false,
-  "message": "Token is invalid or expired"
-}
-```
-
-**cURL Example:**
-```bash
-curl -X GET http://localhost:5000/api/auth/validate \
-  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9..."
-```
-
----
-
-## Tenant Management
-
-### 4. Get All Tenants (Super Admin Only)
-
-**Endpoint:** `GET /tenants`
-
-**Description:** Retrieve all tenants in the system
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: SUPER_ADMIN
-```
-
-**Query Parameters:**
-```
-page=0
-size=20
-sort=createdAt,desc
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Tenants retrieved successfully",
-  "data": [
+*   **Request Body**:
+    ```json
     {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "name": "Acme Corporation",
-      "subdomain": "acme-corp",
-      "subscriptionPlan": "PROFESSIONAL",
-      "status": "ACTIVE",
-      "maxUsers": 50,
-      "maxProjects": 20,
-      "userCount": 12,
-      "projectCount": 5,
-      "createdAt": "2025-12-20T10:30:00Z",
-      "updatedAt": "2025-12-27T14:15:00Z"
+      "tenantName": "Acme Corp",
+      "subdomain": "acme",
+      "adminEmail": "admin@acme.com",
+      "adminPassword": "Password123!",
+      "adminFullName": "Admin User"
     }
-  ]
-}
-```
-
-**Error Response (403 Forbidden):**
-```json
-{
-  "success": false,
-  "message": "Only SUPER_ADMIN can access this resource"
-}
-```
-
----
-
-### 5. Get Tenant Details
-
-**Endpoint:** `GET /tenants/{tenantId}`
-
-**Description:** Retrieve specific tenant details
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: TENANT_ADMIN
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Tenant details retrieved successfully",
-  "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "name": "Acme Corporation",
-    "subdomain": "acme-corp",
-    "subscriptionPlan": "PROFESSIONAL",
-    "status": "ACTIVE",
-    "maxUsers": 50,
-    "maxProjects": 20,
-    "userCount": 12,
-    "projectCount": 5,
-    "createdAt": "2025-12-20T10:30:00Z",
-    "updatedAt": "2025-12-27T14:15:00Z"
-  }
-}
-```
-
----
-
-### 6. Update Tenant
-
-**Endpoint:** `PUT /tenants/{tenantId}`
-
-**Description:** Update tenant settings
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: TENANT_ADMIN
-```
-
-**Request Body:**
-```json
-{
-  "name": "Acme Corp Updated",
-  "subscriptionPlan": "ENTERPRISE",
-  "status": "ACTIVE"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Tenant updated successfully",
-  "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "name": "Acme Corp Updated",
-    "subscriptionPlan": "ENTERPRISE",
-    "status": "ACTIVE",
-    "updatedAt": "2025-12-27T14:15:00Z"
-  }
-}
-```
-
----
-
-### 7. Delete Tenant (Super Admin Only)
-
-**Endpoint:** `DELETE /tenants/{tenantId}`
-
-**Description:** Delete tenant and all associated data
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: SUPER_ADMIN
-```
-
-**Response (204 No Content)**
-
-**Error Response (404 Not Found):**
-```json
-{
-  "success": false,
-  "message": "Tenant not found"
-}
-```
-
----
-
-## User Management
-
-### 8. Get All Users (Tenant Level)
-
-**Endpoint:** `GET /users`
-
-**Description:** Retrieve all users in current tenant
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: TENANT_ADMIN or USER
-```
-
-**Query Parameters:**
-```
-page=0
-size=20
-role=USER
-status=ACTIVE
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Users retrieved successfully",
-  "data": [
+    ```
+*   **Response (201 Created)**:
+    ```json
     {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "email": "john.doe@acme.com",
-      "fullName": "John Doe",
-      "role": "TENANT_ADMIN",
-      "status": "ACTIVE",
-      "lastLogin": "2025-12-27T12:00:00Z",
-      "createdAt": "2025-12-20T10:30:00Z"
-    },
-    {
-      "id": "660e8400-e29b-41d4-a716-446655440000",
-      "email": "jane.smith@acme.com",
-      "fullName": "Jane Smith",
-      "role": "USER",
-      "status": "ACTIVE",
-      "lastLogin": "2025-12-27T11:30:00Z",
-      "createdAt": "2025-12-21T09:15:00Z"
+      "success": true,
+      "data": { "tenantId": "uuid", "token": "jwt-token" }
     }
-  ]
-}
-```
+    ```
+*   **Errors**: `400 Bad Request`, `409 Conflict` (Email/Subdomain exists).
 
----
+### 1.2 Login
+**POST** `/auth/login`
+Authenticate user using email and password.
 
-### 9. Get User Details
-
-**Endpoint:** `GET /users/{userId}`
-
-**Description:** Retrieve specific user details
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "User retrieved successfully",
-  "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "john.doe@acme.com",
-    "fullName": "John Doe",
-    "role": "TENANT_ADMIN",
-    "status": "ACTIVE",
-    "tenantId": "770e8400-e29b-41d4-a716-446655440000",
-    "lastLogin": "2025-12-27T12:00:00Z",
-    "createdAt": "2025-12-20T10:30:00Z",
-    "updatedAt": "2025-12-27T14:15:00Z"
-  }
-}
-```
-
----
-
-### 10. Invite User to Tenant
-
-**Endpoint:** `POST /users/invite`
-
-**Description:** Invite new user to tenant
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: TENANT_ADMIN
-```
-
-**Request Body:**
-```json
-{
-  "email": "newuser@acme.com",
-  "fullName": "New User",
-  "role": "USER"
-}
-```
-
-**Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "User invited successfully. Email sent to newuser@acme.com",
-  "data": {
-    "id": "880e8400-e29b-41d4-a716-446655440000",
-    "email": "newuser@acme.com",
-    "fullName": "New User",
-    "role": "USER",
-    "status": "INVITED",
-    "invitationToken": "invite_token_xxx",
-    "createdAt": "2025-12-27T14:15:00Z"
-  }
-}
-```
-
----
-
-### 11. Update User
-
-**Endpoint:** `PUT /users/{userId}`
-
-**Description:** Update user information
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: TENANT_ADMIN or own user
-```
-
-**Request Body:**
-```json
-{
-  "fullName": "Updated Name",
-  "role": "USER",
-  "status": "ACTIVE"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "User updated successfully",
-  "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "john.doe@acme.com",
-    "fullName": "Updated Name",
-    "role": "USER",
-    "status": "ACTIVE",
-    "updatedAt": "2025-12-27T14:30:00Z"
-  }
-}
-```
-
----
-
-## Project Management
-
-### 12. Get All Projects
-
-**Endpoint:** `GET /projects`
-
-**Description:** Retrieve all projects in current tenant
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
-
-**Query Parameters:**
-```
-page=0
-size=20
-status=ACTIVE
-sort=createdAt,desc
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Projects retrieved successfully",
-  "data": [
+*   **Request Body**:
+    ```json
     {
-      "id": "990e8400-e29b-41d4-a716-446655440000",
-      "name": "Website Redesign",
-      "description": "Complete redesign of company website",
-      "status": "IN_PROGRESS",
-      "owner": {
-        "id": "550e8400-e29b-41d4-a716-446655440000",
-        "email": "john.doe@acme.com",
-        "fullName": "John Doe"
-      },
-      "memberCount": 5,
-      "taskCount": 12,
-      "dueDate": "2026-03-31",
-      "priority": "HIGH",
-      "createdAt": "2025-12-20T10:30:00Z",
-      "updatedAt": "2025-12-27T14:15:00Z"
+      "email": "user@acme.com",
+      "password": "Password123!",
+      "tenantSubdomain": "acme"
     }
-  ]
-}
-```
-
----
-
-### 13. Create Project
-
-**Endpoint:** `POST /projects`
-
-**Description:** Create new project
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-Role Required: TENANT_ADMIN or USER
-```
-
-**Request Body:**
-```json
-{
-  "name": "Mobile App Development",
-  "description": "Native iOS and Android app",
-  "dueDate": "2026-06-30",
-  "priority": "HIGH"
-}
-```
-
-**Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "Project created successfully",
-  "data": {
-    "id": "aa0e8400-e29b-41d4-a716-446655440000",
-    "name": "Mobile App Development",
-    "description": "Native iOS and Android app",
-    "status": "ACTIVE",
-    "dueDate": "2026-06-30",
-    "priority": "HIGH",
-    "taskCount": 0,
-    "memberCount": 1,
-    "createdAt": "2025-12-27T14:15:00Z"
-  }
-}
-```
-
----
-
-### 14. Update Project
-
-**Endpoint:** `PUT /projects/{projectId}`
-
-**Description:** Update project details
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
-
-**Request Body:**
-```json
-{
-  "name": "Mobile App Development v2",
-  "status": "IN_PROGRESS",
-  "priority": "MEDIUM"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Project updated successfully",
-  "data": {
-    "id": "aa0e8400-e29b-41d4-a716-446655440000",
-    "name": "Mobile App Development v2",
-    "status": "IN_PROGRESS",
-    "priority": "MEDIUM",
-    "updatedAt": "2025-12-27T14:30:00Z"
-  }
-}
-```
-
----
-
-## Task Management
-
-### 15. Get All Tasks
-
-**Endpoint:** `GET /tasks`
-
-**Description:** Retrieve all tasks in current tenant
-
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
-
-**Query Parameters:**
-```
-projectId=aa0e8400-e29b-41d4-a716-446655440000
-status=TODO
-assignedTo=550e8400-e29b-41d4-a716-446655440000
-page=0
-size=20
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Tasks retrieved successfully",
-  "data": [
+    ```
+*   **Response (200 OK)**:
+    ```json
     {
-      "id": "bb0e8400-e29b-41d4-a716-446655440000",
-      "title": "Design UI mockups",
-      "description": "Create wireframes and mockups for app screens",
-      "status": "TODO",
-      "priority": "HIGH",
-      "projectId": "aa0e8400-e29b-41d4-a716-446655440000",
-      "assignedTo": {
-        "id": "550e8400-e29b-41d4-a716-446655440000",
-        "email": "john.doe@acme.com",
-        "fullName": "John Doe"
-      },
-      "dueDate": "2026-01-15",
-      "createdAt": "2025-12-20T10:30:00Z",
-      "updatedAt": "2025-12-27T14:15:00Z"
+      "success": true,
+      "data": { "token": "jwt-token", "user": { ... } }
     }
-  ]
-}
-```
+    ```
+*   **Errors**: `401 Unauthorized`.
+
+### 1.3 Validate Token
+**GET** `/auth/validate`
+Check if current token is valid.
+
+*   **Response (200 OK)**: `{"valid": true}`
+*   **Errors**: `401 Unauthorized`.
+
+### 1.4 Get Current User
+**GET** `/auth/me`
+Get details of the currently logged-in user.
+
+*   **Response (200 OK)**: User profile object.
+*   **Errors**: `401 Unauthorized`.
+
+### 1.5 Logout
+**POST** `/auth/logout`
+Invalidate current session (client-side only for JWT).
+
+*   **Response (200 OK)**: `{"message": "Logged out"}`
+
+### 1.6 Health Check
+**GET** `/health`
+System and database health status.
+
+*   **Response (200 OK)**: `{"status": "UP", "database": "CONNECTED"}`
 
 ---
 
-### 16. Create Task
+## 2. Tenant Management
 
-**Endpoint:** `POST /tasks`
+### 2.1 Get All Tenants (Super Admin)
+**GET** `/tenants`
+List all registered tenants.
 
-**Description:** Create new task
+*   **Headers**: `Authorization: Bearer <token>`
+*   **Response (200 OK)**: List of tenants.
+*   **Errors**: `403 Forbidden` (non-super-admin).
 
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
+### 2.2 Get Tenant Details
+**GET** `/tenants/{tenantId}`
+Get detailed profile of a specific tenant.
 
-**Request Body:**
-```json
-{
-  "title": "Implement authentication",
-  "description": "Add JWT authentication to API",
-  "projectId": "aa0e8400-e29b-41d4-a716-446655440000",
-  "assignedTo": "550e8400-e29b-41d4-a716-446655440000",
-  "dueDate": "2026-01-20",
-  "priority": "HIGH"
-}
-```
+*   **Response (200 OK)**: Tenant object.
+*   **Errors**: `403 Forbidden` (accessing other tenant), `404 Not Found`.
 
-**Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "Task created successfully",
-  "data": {
-    "id": "bb0e8400-e29b-41d4-a716-446655440000",
-    "title": "Implement authentication",
-    "description": "Add JWT authentication to API",
-    "status": "TODO",
-    "priority": "HIGH",
-    "projectId": "aa0e8400-e29b-41d4-a716-446655440000",
-    "assignedTo": {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "fullName": "John Doe"
-    },
-    "dueDate": "2026-01-20",
-    "createdAt": "2025-12-27T14:15:00Z"
-  }
-}
-```
+### 2.3 Update Tenant
+**PUT** `/tenants/{tenantId}`
+Update tenant settings (Plan, Name).
+
+*   **Request Body**: `{"name": "New Name", "subscriptionPlan": "PRO"}`
+*   **Response (200 OK)**: Updated tenant object.
+*   **Errors**: `403 Forbidden` (non-admin).
+
+### 2.4 Delete Tenant (Super Admin)
+**DELETE** `/tenants/{tenantId}`
+Permanently remove a tenant and its data.
+
+*   **Response (204 No Content)**
+*   **Errors**: `403 Forbidden`, `404 Not Found`.
 
 ---
 
-### 17. Update Task
+## 3. User Management
 
-**Endpoint:** `PUT /tasks/{taskId}`
+### 3.1 Get All Users
+**GET** `/users`
+List users belonging to the current tenant.
 
-**Description:** Update task details
+*   **Response (200 OK)**: List of users.
 
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
+### 3.2 Get User Details
+**GET** `/users/{userId}`
+Get specific user profile.
 
-**Request Body:**
-```json
-{
-  "title": "Implement JWT authentication",
-  "status": "IN_PROGRESS",
-  "priority": "MEDIUM",
-  "assignedTo": "660e8400-e29b-41d4-a716-446655440000"
-}
-```
+*   **Response (200 OK)**: User object.
+*   **Errors**: `404 Not Found`.
 
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Task updated successfully",
-  "data": {
-    "id": "bb0e8400-e29b-41d4-a716-446655440000",
-    "title": "Implement JWT authentication",
-    "status": "IN_PROGRESS",
-    "priority": "MEDIUM",
-    "updatedAt": "2025-12-27T14:30:00Z"
-  }
-}
-```
+### 3.3 Invite User
+**POST** `/users/invite`
+Add a new user to the tenant.
 
----
+*   **Request Body**:
+    ```json
+    { "email": "brandont@acme.com", "fullName": "Brandon T", "role": "USER" }
+    ```
+*   **Response (201 Created)**: User object with status `INVITED`.
+*   **Errors**: `409 Conflict` (User exists).
 
-### 18. Delete Task
+### 3.4 Update User
+**PUT** `/users/{userId}`
+Update user role or details.
 
-**Endpoint:** `DELETE /tasks/{taskId}`
+*   **Request Body**: `{"role": "TENANT_ADMIN"}`
+*   **Response (200 OK)**: Updated user.
 
-**Description:** Delete task
+### 3.5 Delete User
+**DELETE** `/users/{userId}`
+Remove a user from the tenant.
 
-**Headers Required:**
-```
-Authorization: Bearer {token}
-```
-
-**Response (204 No Content)**
+*   **Response (204 No Content)**
 
 ---
 
-## Health & System
+## 4. Project Management
 
-### 19. Health Check
+### 4.1 Get All Projects
+**GET** `/projects`
+List projects for the current tenant.
 
-**Endpoint:** `GET /health`
+*   **Response (200 OK)**: List of projects.
 
-**Description:** Check application and database health
+### 4.2 Create Project
+**POST** `/projects`
+Create a new project workspace.
 
-**Headers Required:** None (public endpoint)
+*   **Request Body**:
+    ```json
+    { "name": "Q4 Goals", "description": "...", "priority": "HIGH" }
+    ```
+*   **Response (201 Created)**: Project object.
 
-**Response (200 OK):**
-```json
-{
-  "status": "UP",
-  "database": "CONNECTED",
-  "jwt_validation": "WORKING",
-  "timestamp": "2025-12-27T14:35:00Z",
-  "uptime": 3600000,
-  "version": "1.0.0"
-}
-```
+### 4.3 Update Project
+**PUT** `/projects/{projectId}`
+Update project status or details.
 
-**cURL Example:**
-```bash
-curl http://localhost:5000/api/health
-```
+*   **Request Body**: `{"status": "COMPLETED"}`
+*   **Response (200 OK)**: Updated project.
 
----
+### 4.4 Delete Project
+**DELETE** `/projects/{projectId}`
+Delete a project and its tasks.
 
-## Error Handling
-
-All endpoints return consistent error responses with HTTP status codes:
-
-### HTTP Status Codes
-
-- **200 OK:** Successful request
-- **201 Created:** Resource created
-- **204 No Content:** Successful deletion
-- **400 Bad Request:** Invalid input
-- **401 Unauthorized:** Missing or invalid token
-- **403 Forbidden:** Insufficient permissions
-- **404 Not Found:** Resource not found
-- **409 Conflict:** Resource already exists
-- **500 Internal Server Error:** Server error
-
-### Error Response Format
-
-```json
-{
-  "success": false,
-  "message": "Error description",
-  "error": {
-    "code": "ERROR_CODE",
-    "details": "Additional error details"
-  }
-}
-```
+*   **Response (204 No Content)**
 
 ---
 
-## Rate Limiting
+## 5. Task Management
 
-- Requests per minute: 60 per user
-- Concurrent requests: 10 per user
-- Request timeout: 30 seconds
+### 5.1 Get All Tasks
+**GET** `/tasks`
+List tasks (can filter by projectId).
 
----
+*   **Query Params**: `?projectId=...`
+*   **Response (200 OK)**: List of tasks.
 
-## Pagination
+### 5.2 Create Task
+**POST** `/tasks` (or `/projects/{projectId}/tasks`)
+Add a task to a project.
 
-All list endpoints support pagination with these parameters:
+*   **Request Body**:
+    ```json
+    { "title": "Design Logo", "projectId": "uuid", "priority": "MEDIUM" }
+    ```
+*   **Response (201 Created)**: Task object.
 
-```
-page=0          # Zero-indexed page number
-size=20         # Items per page (max 100)
-sort=field,asc  # Sort field and direction (asc/desc)
-```
+### 5.3 Update Task
+**PUT** `/tasks/{taskId}`
+Update status or assignment.
 
-Example:
-```bash
-curl http://localhost:5000/api/projects?page=0&size=20&sort=createdAt,desc \
-  -H "Authorization: Bearer {token}"
-```
+*   **Request Body**: `{"status": "DONE"}`
+*   **Response (200 OK)**: Updated task.
 
----
+### 5.4 Delete Task
+**DELETE** `/tasks/{taskId}`
+Remove a task.
 
-## Testing All Endpoints
-
-Use the provided [Postman Collection](./postman-collection.json) or test with cURL:
-
-```bash
-# 1. Register tenant
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"tenantName":"Test","email":"test@test.com","password":"Pass123!","fullName":"Test User"}'
-
-# 2. Login and capture token
-TOKEN=$(curl -s -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@test.com","password":"Pass123!"}' | jq -r '.data.token')
-
-# 3. Test authenticated endpoints
-curl -H "Authorization: Bearer $TOKEN" http://localhost:5000/api/users
-
-# 4. Create project
-curl -X POST http://localhost:5000/api/projects \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test Project","priority":"HIGH"}'
-```
-
----
-
-## Webhooks (Future)
-
-Future endpoint for webhook subscriptions:
-- `POST /webhooks/subscribe` - Subscribe to events
-- `POST /webhooks/unsubscribe` - Unsubscribe from events
-
----
-
-This API documentation covers all 19 endpoints with request/response examples, error handling, and testing guidance for the WorkStack SaaS platform.
+*   **Response (204 No Content)**
