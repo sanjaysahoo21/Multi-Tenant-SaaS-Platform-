@@ -7,6 +7,10 @@ CREATE TABLE audit_logs (
     entity_type VARCHAR(255) NOT NULL,
     entity_id VARCHAR(255) NOT NULL,
     ip_address VARCHAR(45),
+    details TEXT,
+    old_value TEXT,
+    new_value TEXT,
+    user_agent VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_audit_logs_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
     CONSTRAINT fk_audit_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL

@@ -7,6 +7,9 @@ CREATE TABLE tenants (
     subscription_plan VARCHAR(50) NOT NULL DEFAULT 'FREE',
     max_users INTEGER NOT NULL DEFAULT 5,
     max_projects INTEGER NOT NULL DEFAULT 3,
+    contact_email VARCHAR(255),
+    phone VARCHAR(50),
+    address TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
