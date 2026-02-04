@@ -20,6 +20,10 @@ function Users() {
     isActive: true
   });
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [totalPages, setTotalPages] = useState(1);
+
 
   useEffect(() => {
     if (currentUser?.role === 'TENANT_ADMIN' || currentUser?.role === 'SUPER_ADMIN') {
@@ -32,12 +36,28 @@ function Users() {
       setError('');
       setLoading(true);
 
+      const params = {
+        page,
+        limit: 10,
+        search: search || undefined
+      };
+
       const response = currentUser?.role === 'SUPER_ADMIN'
-        ? await api.get('/users')
-        : await api.get(`/tenants/${currentUser.tenant.id}/users`);
+        ? await api.get('/users', { params })
+        : await api.get(`/tenants/${currentUser.tenant.id}/users`, { params });
 
       const data = response?.data?.data;
-      setUsers(Array.isArray(data) ? data : []);
+      // Handle both paginated and non-paginated responses
+      if (data && Array.isArray(data.users)) {
+        setUsers(data.users);
+        setTotalPages(data.totalPages || 1);
+      } else if (Array.isArray(data)) {
+        setUsers(data);
+        setTotalPages(1);
+      } else {
+        setUsers([]);
+      }
+
     } catch (error) {
       console.error('Failed to load users:', error);
       setError('Failed to load users');
@@ -46,6 +66,14 @@ function Users() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentUser) loadUsers();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [page, search, currentUser]);
+
 
   const handleOpenModal = (user = null) => {
     if (user) {
@@ -169,6 +197,17 @@ function Users() {
           )}
         </div>
 
+        <div className="search-bar" style={{ marginBottom: '20px' }}>
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ padding: '8px', width: '100%', maxWidth: '300px', borderRadius: '4px', border: '1px solid #ddd' }}
+          />
+        </div>
+
+
         {error && <div className="error-message">{error}</div>}
 
         <div className="users-table-container">
@@ -223,12 +262,33 @@ function Users() {
           </table>
         </div>
 
+        <div className="pagination-controls" style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+          <button
+            className="btn btn-secondary"
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+          >
+            Previous
+          </button>
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            className="btn btn-secondary"
+            disabled={page >= totalPages}
+            onClick={() => setPage(p => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+
+
         {showModal && (
           <div className="modal-overlay" onClick={handleCloseModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h2>{editingUser ? 'Edit User' : 'Add New User'}</h2>
               {error && <div className="error-message">{error}</div>}
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="fullName">Full Name *</label>

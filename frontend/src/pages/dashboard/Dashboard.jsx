@@ -13,9 +13,11 @@ function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      loadStats();
+    if (!user) {
+      navigate('/login');
+      return;
     }
+    loadStats();
   }, [user]);
 
   const loadStats = async () => {

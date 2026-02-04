@@ -8,8 +8,12 @@ function Register() {
     tenantName: '',
     subdomain: '',
     subscriptionPlan: 'FREE',
+    contactEmail: '',
+    phone: '',
+    address: '',
     adminEmail: '',
     adminPassword: '',
+    confirmPassword: '',
     adminFullName: ''
   });
   const [error, setError] = useState('');
@@ -27,6 +31,12 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (formData.adminPassword !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -92,6 +102,43 @@ function Register() {
           </div>
 
           <div className="form-group">
+            <label htmlFor="contactEmail">Contact Email</label>
+            <input
+              type="email"
+              id="contactEmail"
+              name="contactEmail"
+              value={formData.contactEmail}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phone">Phone Number</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="address">Address</label>
+            <textarea
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              rows="2"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="adminFullName">Your Name</label>
             <input
               type="text"
@@ -124,6 +171,20 @@ function Register() {
               id="adminPassword"
               name="adminPassword"
               value={formData.adminPassword}
+              onChange={handleChange}
+              required
+              minLength="6"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
               onChange={handleChange}
               required
               minLength="6"
